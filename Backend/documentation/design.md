@@ -71,5 +71,3 @@ Future enhancements to the backend may include:
 - Optimization of database queries and performance tuning for scalability.
 
 ---
-
-This design document provides an overview of the architecture, design decisions, and key components of the backend system for the MMPs project. It serves as a guide for developers and stakeholders involved in the development and maintenance of the system.
