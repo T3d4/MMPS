@@ -15,7 +15,7 @@ To get started with MMPS, follow these steps:
 
 1. **Clone the Repository:** Clone the MMPS repository to your local machine. (Note: As this is a private repository, ensure you have access permissions.)
    ```
-   git clone https://github.com/your-username/mmps.git
+   git clone https://github.com/T3d4/mmps.git
    ```
 
 2. **Install Dependencies:** Navigate to the project directory and install the necessary dependencies.
