@@ -18,3 +18,9 @@ app.use(json());
 app.use(urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(morgan("dev"));
+
+// routes
+
+//
+app.use(notFound);
+app.use(errHandler);
