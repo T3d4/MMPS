@@ -1,5 +1,5 @@
 //Under development
-import { Document, Model, Types } from "mongoose";
+import { Model} from "mongoose";
 
 export interface IUser{
     user_id?:   string;
