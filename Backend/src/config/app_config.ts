@@ -2,6 +2,7 @@ import cors from "cors";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import express, { json, urlencoded, Application } from "express";
+import { notFound, errHandler } from "../middlewares";
 
 export const app: Application = express();
 
