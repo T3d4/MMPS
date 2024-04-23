@@ -7,7 +7,7 @@ import {
     hashPassword,
     refreshAccessToken,
 } from "../utils";
-import { IUser, IUserDoc, ProtectedRequest } from "../interfaces";
+import { IUser } from "../interfaces";
 
 // const accessCookieConfig: object = {}
 const refreshCookieConfig: object = {
@@ -41,8 +41,7 @@ export class AuthController {
             res.status(201).json({
                 message: "User created successfully",
                 data: {
-                    user: user._id,
-                    staffNo: user.staffNo,
+                    user: user._id
                 },
             });
         } catch (error) {

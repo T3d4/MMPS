@@ -1,5 +1,5 @@
 //Under development
-import { authenticateToken, isAdmin, validator } from "../middleware";
+import { validator } from "../middlewares";
 import { AuthController } from "../controllers";
 import { Router } from "express";
 import {
@@ -11,7 +11,6 @@ const {
     createUser,
     login,
     refresh,
-    resetPassword,
     logout,
 } = new AuthController();
 
