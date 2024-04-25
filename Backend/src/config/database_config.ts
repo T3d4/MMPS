@@ -14,7 +14,7 @@ export const createDB = async (): Promise<void> => {
         mongoose.set("strictQuery", false);
         const { url } = selectDB();
         await connect(String(url));
-        console.log(`Database connected sucessfully to mongoDB`);
+        console.log(`Successfully connected to database`);
     } catch (error: any) {
         throw new Error(error);
     }

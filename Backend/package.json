@@ -4,6 +4,8 @@
   "description": "multi-modal proctocring/quiz software",
   "main": "app.ts",
   "scripts": {
+    "start": "ts-node ./src/app.ts",
+    "dev": "nodemon ./src/app.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
