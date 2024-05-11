@@ -18,13 +18,9 @@ const refreshCookieConfig: object = {
 };
 
 export class AuthController {
-    // Only super admin can create new Users
     public async createUser(req: Request, res: Response, next: NextFunction) {
         try {
-            // Destructure password and other fields from the request body
             const { password, ...otherFields } = req.body;
-
-            // Hash the password
             const hashedPassword: string = hashPassword(password);
 
             // Create a new user object with hashed password and other fields
@@ -34,10 +30,8 @@ export class AuthController {
                 hash: hashedPassword,
             };
 
-            // Create the user using Mongoose model
             const user = await User.create(newUser);
 
-            // Respond with success message and user details
             res.status(201).json({
                 message: "User created successfully",
                 data: {
@@ -58,7 +52,6 @@ export class AuthController {
                 const user: any = await User.login(email, password);
 
                 if (user) {
-                    // Generate access and refresh tokens
                     const accessToken = await generateAccessToken(user._id);
                     const refreshToken = await generateRefreshToken(user._id);
 
@@ -78,21 +71,17 @@ export class AuthController {
                     const sanitizedUser = {
                         ...user.toObject(),
                         hash: undefined,
-                        otp: undefined,
                         refreshtkn: undefined,
                         otpExpiresBy: undefined,
-                        firstLogin: undefined
                     };
 
                     // Respond with success message, user details, and tokens
                     return res.status(200).json({
                         message: "Login Successful",
-                        firstLogin: user.firstLogin,
                         user: sanitizedUser,
                         token: accessToken,
                     });
                 } else {
-                    // If login fails, respond with 401 and an error message
                     res.status(401);
                     throw new Error("Invalid email or password");
                 }
@@ -102,7 +91,6 @@ export class AuthController {
                 throw new Error("Email and password are required");
             }
         } catch (error) {
-            // Pass any errors to the next middleware for centralized error handling
             next(error);
         }
     }
