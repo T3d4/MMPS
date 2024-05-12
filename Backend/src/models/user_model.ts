@@ -2,13 +2,12 @@
 import { Schema, model } from "mongoose";
 import { IUser, IUserMethods } from "../interfaces";
 import { compare } from "bcrypt";
+import { string } from "joi";
 
 const userSchema = new Schema<IUser, IUserMethods>(
     {
-        user_id: {
+        _id: {
             type: String,
-            required: true,
-            unique: true,
         },
         first_name: {
             type: String,
@@ -16,10 +15,10 @@ const userSchema = new Schema<IUser, IUserMethods>(
         last_name: {
             type: String,
         },
-        // email: {
-        //     type: String,
-        //     unique: true,
-        // },
+        email: {
+            type: String,
+            unique: true,
+        },
         hash: {
             type: String,
             required: true,
@@ -38,8 +37,8 @@ const userSchema = new Schema<IUser, IUserMethods>(
 );
 
 // Define a static method 'login' for the user schema
-userSchema.statics.login = async function (user_id: string, password: string) {
-    const user: any = await this.findOne({ user_id });
+userSchema.statics.login = async function (email: string, password: string) {
+    const user: any = await this.findOne({ email });
 
     if (user) {
         const auth: boolean = await compare(password, user.hash);

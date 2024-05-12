@@ -1,5 +1,5 @@
 //Under development
-import { Schema } from "mongoose";
+import { Schema, model } from "mongoose";
 import { IQuiz } from "../interfaces";
 
 const quizSchema = new Schema<IQuiz>(
@@ -31,3 +31,5 @@ const quizSchema = new Schema<IQuiz>(
         timestamps: true,
     }
 );
+
+export const Quiz = model<IQuiz>("quiz", quizSchema);
