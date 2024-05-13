@@ -9,9 +9,6 @@ const quizSchema = new Schema<IQuiz>(
             required: true,
             unique: true,
         },
-        imgURL: {
-            type: String,
-        },
         name: {
             type: String,
             required: true,
