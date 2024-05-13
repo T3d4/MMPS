@@ -6,13 +6,10 @@ import { string } from "joi";
 
 const userSchema = new Schema<IUser, IUserMethods>(
     {
-        _id: {
+        firstName: {
             type: String,
         },
-        first_name: {
-            type: String,
-        },
-        last_name: {
+        lastName: {
             type: String,
         },
         email: {
@@ -23,11 +20,11 @@ const userSchema = new Schema<IUser, IUserMethods>(
             type: String,
             required: true,
         },
-        is_admin: {
+        isAdmin: {
             type: Boolean,
             default: false,
         },
-        refresh_token: {
+        refreshToken: {
             type: String,
         }
     },
@@ -36,6 +33,13 @@ const userSchema = new Schema<IUser, IUserMethods>(
     }
 );
 
+userSchema.virtual('id').get(function (this: IUser) {
+    return this._id.toString();
+});
+
+userSchema.set('toJSON', {
+    virtuals: true,
+});
 // Define a static method 'login' for the user schema
 userSchema.statics.login = async function (email: string, password: string) {
     const user: any = await this.findOne({ email });

@@ -1,14 +1,16 @@
 //Under development
-import { Model} from "mongoose";
+import { Types } from "joi";
+import { Model, ObjectId } from "mongoose";
 
-export interface IUser{
-    user_id?:   string;
-    first_name?: string;
-    last_name?:  string;
-    // email?:string;
-    hash?:string;
-    refresh_token?:string;
-    is_admin?:boolean;
+export interface IUser {
+    _id?: ObjectId;
+    id?: string;
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+    hash?: string;
+    refreshToken?: string;
+    isAdmin?: boolean;
 }
 
 export interface IUserMethods extends Model<IUser> {
