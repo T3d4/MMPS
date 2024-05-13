@@ -18,31 +18,6 @@ const refreshCookieConfig: object = {
 };
 
 export class AuthController {
-    public async createUser(req: Request, res: Response, next: NextFunction) {
-        try {
-            const { password, ...otherFields } = req.body;
-            const hashedPassword: string = hashPassword(password);
-
-            // Create a new user object with hashed password and other fields
-            const newUser: IUser = {
-                ...otherFields,
-                isAdmin: req.body.isAdmin || false, // Set isAdmin to false if not provided
-                hash: hashedPassword,
-            };
-
-            const user = await User.create(newUser);
-
-            res.status(201).json({
-                message: "User created successfully",
-                data: {
-                    user: user._id
-                },
-            });
-        } catch (error) {
-            // Pass any errors to the next middleware for centralized error handling
-            next(error);
-        }
-    }
 
     public async login(req: Request, res: Response, next: NextFunction) {
         const { email, password } = req.body;
@@ -59,28 +34,29 @@ export class AuthController {
                     await User.findByIdAndUpdate(
                         user._id,
                         {
-                            refreshtkn: refreshToken,
+                            refreshToken: refreshToken,
                         },
                         { new: true }
                     );
 
                     // Set the refresh token as a cookie
-                    res.cookie("refreshtkn", refreshToken, refreshCookieConfig);
+                    res.cookie("refreshToken", refreshToken, refreshCookieConfig);
 
-                    // Create a sanitized user object by excluding the hash
                     const sanitizedUser = {
                         ...user.toObject(),
                         hash: undefined,
-                        refreshtkn: undefined,
+                        refreshToken: undefined,
                         otpExpiresBy: undefined,
                     };
 
-                    // Respond with success message, user details, and tokens
+                    // Set the access token in the Authorization header
+                    res.setHeader('Authorization', `Bearer ${accessToken}`);
+
                     return res.status(200).json({
                         message: "Login Successful",
                         user: sanitizedUser,
-                        token: accessToken,
                     });
+
                 } else {
                     res.status(401);
                     throw new Error("Invalid email or password");
@@ -95,12 +71,11 @@ export class AuthController {
         }
     }
 
+
     public async refresh(req: Request, res: Response, next: NextFunction) {
         try {
-            // Extract the refresh token from the request cookies
             const { refresh_token } = req.cookies;
 
-            // If no refresh token is found, respond with 401 and an error message
             if (!refresh_token) {
                 res.status(401);
                 throw new Error("No refresh token in cookie");
@@ -118,10 +93,9 @@ export class AuthController {
             const sanitizedUser = {
                 ...user.toObject(),
                 hash: undefined,
-                refreshtkn: undefined,
+                refreshToken: undefined,
             };
 
-            // Generate a new access token using the refresh token
             const token = await refreshAccessToken(refresh_token);
 
             // Respond with success message and the new access token
@@ -138,21 +112,19 @@ export class AuthController {
 
     public async logout(req: Request, res: Response, next: NextFunction) {
         try {
-            // Extract the refresh token from cookies
-            const { refreshtkn } = req.cookies;
+            const { refreshToken } = req.cookies;
 
-            // If no refresh token is found in cookies, respond with an error
-            if (!refreshtkn) {
+            if (!refreshToken) {
                 res.status(403)
                 throw new Error("No refresh token in cookie");
             }
 
             // Find the user document associated with the provided refresh token
-            const user = await User.findOne({ refreshtkn });
+            const user = await User.findOne({ refreshToken });
 
             // If user is not found, clear the refresh token cookie and respond with an error status
             if (!user) {
-                res.clearCookie("refreshtkn", {
+                res.clearCookie("refreshToken", {
                     httpOnly: true,
                     secure: true,
                 });
@@ -162,7 +134,7 @@ export class AuthController {
             await User.findByIdAndUpdate(
                 user._id,
                 {
-                    refreshtkn: " ",
+                    refreshToken: " ",
                 },
                 {
                     new: true,
@@ -170,7 +142,7 @@ export class AuthController {
             );
 
             // Clear the refresh token cookie
-            res.clearCookie("refreshtkn", {
+            res.clearCookie("refreshToken", {
                 httpOnly: true,
                 secure: true,
             });
