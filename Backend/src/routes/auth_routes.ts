@@ -8,16 +8,12 @@ import {
 } from "../validators";
 
 const {
-    createUser,
     login,
     refresh,
     logout,
 } = new AuthController();
 
 export const authRouter = Router();
-
-// admin creates each new user
-authRouter.route("/create").post(validator(createUserSchema), createUser);
 
 // admin or user logs in
 authRouter.route("/login").post(validator(loginSchema), login);
