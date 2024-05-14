@@ -1,17 +1,17 @@
 <script setup>
-import Question from "../components/QuestionComponent.vue";
-import QuizHeader from "../components/QuizHeaderComponent.vue";
-import Result from "../components/ResultComponent.vue";
-import { useRoute } from "vue-router";
-import { ref, computed } from "vue";
-import quizes from "../data/quizes.json";
+import Question from '@/components/QuestionComponent.vue'
+import QuizHeader from '@/components/QuizHeaderComponent.vue'
+import Result from '@/components/ResultComponent.vue'
+import { useRoute } from 'vue-router'
+import { ref, computed } from 'vue'
+import quizes from '@/data/quizes.json'
 
-const route = useRoute();
-const quizId = parseInt(route.params.id);
-const quiz = quizes.find((q) => q.id === quizId);
-const currentQuestionIndex = ref(0);
-const numberOfCorrectAnswers = ref(0);
-const showResults = ref(false);
+const route = useRoute()
+const quizId = parseInt(route.params.id)
+const quiz = quizes.find((q) => q.id === quizId)
+const currentQuestionIndex = ref(0)
+const numberOfCorrectAnswers = ref(0)
+const showResults = ref(false)
 
 // const questionStatus = ref(`${currentQuestionIndex.value}/${quiz.questions.length}`)
 
@@ -19,24 +19,22 @@ const showResults = ref(false);
 //     questionStatus.value = `${currentQuestionIndex.value}/${quiz.questions.length}`
 // })
 
-const questionStatus = computed(
-  () => `${currentQuestionIndex.value}/${quiz.questions.length}`
-);
+const questionStatus = computed(() => `${currentQuestionIndex.value}/${quiz.questions.length}`)
 const barPercentage = computed(
   () => `${(currentQuestionIndex.value / quiz.questions.length) * 100}%`
-);
+)
 
 const onOptionSelected = (isCorrect) => {
   if (isCorrect) {
-    numberOfCorrectAnswers.value++;
+    numberOfCorrectAnswers.value++
   }
 
   if (quiz.questions.length - 1 === currentQuestionIndex.value) {
-    showResults.value = true;
+    showResults.value = true
   }
 
-  currentQuestionIndex.value++;
-};
+  currentQuestionIndex.value++
+}
 </script>
 
 <template>
