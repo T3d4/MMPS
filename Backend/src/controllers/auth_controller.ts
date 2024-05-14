@@ -4,9 +4,11 @@ import { NextFunction, Request, Response } from "express";
 import {
     generateAccessToken,
     generateRefreshToken,
-    hashPassword,
     refreshAccessToken,
 } from "../utils";
+
+// TODO
+// use user interface for enabling a contract between user variables
 import { IUser } from "../interfaces";
 
 // const accessCookieConfig: object = {}
