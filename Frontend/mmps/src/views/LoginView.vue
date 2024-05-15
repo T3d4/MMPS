@@ -1,20 +1,20 @@
 <template>
   <div
-    class="h-screen flex items-center justify-center bg-gradient-to-br from-blue-900 to-green-900"
+    class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-900 to-green-900 overflow-y-auto"
   >
-    <div class="bg-white bg-opacity-90 p-8 rounded shadow-md max-w-md w-full">
+    <div class="bg-white bg-opacity-90 p-8 rounded shadow-md max-w-md w-full overflow-hidden">
       <h2 class="text-2xl font-bold text-gray-900 mb-4 text-center">Account Login</h2>
 
       <form @submit.prevent="loginUser">
         <div class="mb-4">
-          <label for="email" class="block text-sm font-medium text-gray-00">Email</label>
+          <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
           <input
             id="email"
             v-model="login.email"
             type="email"
             autocomplete="on"
             required
-            class="mt-1 p-2 w-full border rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            class="mt-1 p-2 w-full border rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm text-gray-900"
           />
         </div>
 
@@ -27,7 +27,7 @@
               :type="passwordVisible ? 'text' : 'password'"
               autocomplete="on"
               required
-              class="mt-1 p-2 w-full border rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              class="mt-1 p-2 w-full border rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm text-gray-900"
             />
             <button
               @click="togglePasswordVisibility"
@@ -56,7 +56,9 @@
 
       <div class="text-center mt-4">
         <span class="text-sm text-gray-600">Don't have an account? </span>
-        <a href="/signup" class="font-medium text-indigo-600 hover:text-indigo-500">Sign up</a>
+        <router-link to="/signup" class="font-medium text-indigo-600 hover:text-indigo-500"
+          >Sign Up</router-link
+        >
       </div>
     </div>
   </div>
@@ -82,6 +84,7 @@ const loginUser = () => {
   base
     .post('/login', login)
     .then((result) => {
+      // Handle successful signup (e.g., redirect to login page)
       if (result.accesstkn) {
         router.push('/home')
       } else {
@@ -90,6 +93,7 @@ const loginUser = () => {
     })
     .catch((err) => {
       console.log(err)
+      // Handle signup errors
     })
 }
 </script>
