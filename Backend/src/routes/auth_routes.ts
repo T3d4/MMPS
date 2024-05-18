@@ -11,7 +11,10 @@ const {
     login,
     refresh,
     logout,
+    validateFace
 } = new AuthController();
+
+import {authenticateToken} from "../middlewares";
 
 export const authRouter = Router();
 
@@ -26,3 +29,4 @@ authRouter.route("/refresh").get(refresh);
 
 // clears cookies and loggs out user
 authRouter.route("/logout").get(logout);
+authRouter.post("/validateFace");

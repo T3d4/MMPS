@@ -26,7 +26,11 @@ const userSchema = new Schema<IUser, IUserMethods>(
         },
         refreshToken: {
             type: String,
-        }
+        },
+        faceDescriptor: {
+            type: [Number],
+            required: true
+        },
     },
     {
         timestamps: true,

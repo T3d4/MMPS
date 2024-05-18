@@ -18,6 +18,10 @@
     "moduleResolution": "node16",
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": true,
-    "noFallthroughCasesInSwitch": false
+    "noFallthroughCasesInSwitch": false,
+    "typeRoots": [
+      "./node_modules/@types", // Default location for library type definitions
+      "./src/types"
+    ]
   }
 }
