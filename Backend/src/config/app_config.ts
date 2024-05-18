@@ -5,6 +5,10 @@ import express, { json, urlencoded, Application } from "express";
 import { notFound, errHandler } from "../middlewares";
 import { router, authRouter, userRouter, quizRouter } from "../routes";
 import path from 'path';
+import '@tensorflow/tfjs-node';
+import { monkeyPatchFaceAPI } from '../utils/faceapi-env';
+
+monkeyPatchFaceAPI();
 
 export const app: Application = express();
 
