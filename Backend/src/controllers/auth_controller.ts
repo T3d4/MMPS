@@ -7,9 +7,11 @@ import {
     refreshAccessToken,
 } from "../utils";
 
+import * as faceapi from 'face-api.js';
+
 // TODO
 // use user interface for enabling a contract between user variables
-import { IUser } from "../interfaces";
+// import { IUser } from "../interfaces";
 
 // const accessCookieConfig: object = {}
 const refreshCookieConfig: object = {
@@ -153,6 +155,30 @@ export class AuthController {
         } catch (error) {
             // Pass any errors to the next middleware for centralized error handling
             next(error);
+        }
+    }
+
+    public async validateFace(req: Request, res: Response, next: NextFunction) {
+        try {
+            const { faceDescriptor } = req.body
+
+            const user = await User.findOne()
+            if (!user) {
+                return res.status(404).json({ success: false, message: 'User not found' })
+            }
+
+            const distance = faceapi.euclideanDistance(faceDescriptor, user.faceDescriptor)
+            const threshold = 0.6
+            const isMatch = distance < threshold
+
+            if (isMatch) {
+                res.json({ success: true })
+            } else {
+                res.json({ success: false, message: 'Face not recognized' })
+            }
+        } catch (error) {
+            console.error(error)
+            res.status(500).json({ success: false, message: 'Internal server error' })
         }
     }
 }
