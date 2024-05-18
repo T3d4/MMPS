@@ -11,7 +11,7 @@ export interface IUser {
     hash?: string;
     refreshToken?: string;
     isAdmin?: boolean;
-    faceDescriptor?: [number];
+    faceDescriptor?: Array[any];
 }
 
 export interface IUserMethods extends Model<IUser> {

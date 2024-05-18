@@ -14,8 +14,6 @@ export const userRouter = Router();
 // CREATE - Create a new user (Admin only)
 userRouter.post(
     "/",
-    authenticateToken,
-    isAdmin,
     validator(createUserSchema),
     createUser
 );
