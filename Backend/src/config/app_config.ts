@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 import express, { json, urlencoded, Application } from "express";
 import { notFound, errHandler } from "../middlewares";
 import { router, authRouter, userRouter, quizRouter } from "../routes";
+import path from 'path';
 
 export const app: Application = express();
 
@@ -24,6 +25,10 @@ app.use(morgan("dev"));
 
 // routes
 app.use(router)
+
+// Serve face-api.js models
+app.use('/models', express.static(path.join(__dirname, 'public/models')))
+
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/quiz", quizRouter)

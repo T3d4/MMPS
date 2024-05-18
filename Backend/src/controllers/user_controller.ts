@@ -30,7 +30,7 @@ export class UserController {
         }
     }
 
-    async getUserById(req: Request, res: Response, next: NextFunction) {
+    public async getUserById(req: Request, res: Response, next: NextFunction) {
         try {
             const userId = req.params.id;
             const user = await User.findById(userId);
@@ -47,7 +47,7 @@ export class UserController {
         }
     }
 
-    async getAllUsers(req: Request, res: Response, next: NextFunction) {
+    public async getAllUsers(req: Request, res: Response, next: NextFunction) {
         try {
             const users = await User.find();
             // Sanitize all user objects in the array before sending
@@ -58,7 +58,7 @@ export class UserController {
         }
     }
 
-    async updateUser(req: RequestWithUser, res: Response, next: NextFunction) {
+    public async updateUser(req: RequestWithUser, res: Response, next: NextFunction) {
         try {
             const userId = req.params.id;
             const updateData = req.body;
@@ -89,7 +89,7 @@ export class UserController {
         }
     }
 
-    async deleteUser(req: RequestWithUser, res: Response, next: NextFunction) {
+    public async deleteUser(req: RequestWithUser, res: Response, next: NextFunction) {
         try {
             const userId = req.params.id;
 
