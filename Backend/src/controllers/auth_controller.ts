@@ -6,7 +6,6 @@ import {
     generateRefreshToken,
     refreshAccessToken,
 } from "../utils";
-
 import * as faceapi from 'face-api.js';
 
 // TODO
@@ -145,7 +144,6 @@ export class AuthController {
                 }
             );
 
-            // Clear the refresh token cookie
             res.clearCookie("refreshToken", {
                 httpOnly: true,
                 secure: true,
@@ -160,25 +158,41 @@ export class AuthController {
 
     public async validateFace(req: Request, res: Response, next: NextFunction) {
         try {
-            const { faceDescriptor } = req.body
+            const { email, faceDescriptor } = req.body;
 
-            const user = await User.findOne()
-            if (!user) {
-                return res.status(404).json({ success: false, message: 'User not found' })
+            if (!email || !faceDescriptor) {
+                return res.status(400).json({ message: "Email and face descriptor are required." });
             }
 
-            const distance = faceapi.euclideanDistance(faceDescriptor, user.faceDescriptor)
-            const threshold = 0.6
-            const isMatch = distance < threshold
-
-            if (isMatch) {
-                res.json({ success: true })
-            } else {
-                res.json({ success: false, message: 'Face not recognized' })
+            const user = await User.findOne({ email });
+            if (!user || !user.faceDescriptor) {
+                return res.status(404).json({ message: "User not found or face descriptor missing" });
             }
+
+            // Load models (only once, potentially on server startup)
+            await faceapi.nets.ssdMobilenetv1.loadFromDisk('../public/models');
+            await faceapi.nets.faceLandmark68Net.loadFromDisk('../public/models');
+            await faceapi.nets.faceRecognitionNet.loadFromDisk('../public/models');
+
+            // Create LabeledFaceDescriptors and FaceMatcher
+            const labeledFaceDescriptors = new faceapi.LabeledFaceDescriptors(
+                user.email,
+                [Float32Array.from(user.faceDescriptor)]
+            );
+            const faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors, 0.6);
+
+            // Compare the descriptors
+            const bestMatch = faceMatcher.findBestMatch(new Float32Array(faceDescriptor));
+
+            if (bestMatch.distance < 0.6) {
+                return res.status(200).json({ success: true, message: 'Face validated successfully', user });
+            }
+
+            return res.status(401).json({ success: false, message: 'Face not recognized' });
+
         } catch (error) {
-            console.error(error)
-            res.status(500).json({ success: false, message: 'Internal server error' })
+            next(error);
         }
+
     }
 }

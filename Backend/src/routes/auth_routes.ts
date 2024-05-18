@@ -29,4 +29,4 @@ authRouter.route("/refresh").get(refresh);
 
 // clears cookies and loggs out user
 authRouter.route("/logout").get(logout);
-authRouter.post("/validateFace", authenticateToken)
+authRouter.post("/validateFace");
