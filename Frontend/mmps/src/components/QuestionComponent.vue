@@ -1,64 +1,46 @@
-<script setup>
-const emit = defineEmits(["selectOption"]);
-
-const { question } = defineProps(["question"]);
-
-const emitSelectedOption = (isCorrect) => {
-  emit("selectOption", isCorrect);
-};
-</script>
-
 <template>
-  <div class="question-container">
-    <h1 class="question">
+  <div
+    class="question-container rounded-md shadow-md bg-white p-6 mb-4 w-full max-w-md sm:max-w-lg h-full"
+  >
+    <h1 class="question text-2xl font-semibold text-gray-800 mb-4">
       {{ question.text }}
     </h1>
-  </div>
-  <div class="options-container">
-    <div
-      v-for="option in question.options"
-      :key="option.id"
-      class="option"
-      @click="emitSelectedOption(option.isCorrect)"
-    >
-      <p class="option-label">{{ option.label }}</p>
-      <div class="option-value">
-        <p>{{ option.text }}</p>
-      </div>
+
+    <div>
+      <button
+        v-for="option in question.options"
+        :key="option.id"
+        class="flex items-center py-3 px-4 w-full text-left bg-gray-100 hover:bg-gray-200 rounded mb-2"
+        :class="{
+          correct: selectedOption === option.id && option.isCorrect,
+          incorrect: selectedOption === option.id && !option.isCorrect
+        }"
+        @click="selectOption(option.id, option.isCorrect)"
+      >
+        <span
+          class="mr-4 px-4 py-2 text-lg font-medium text-gray-700 ring-slate-500 ring-2 rounded"
+          >{{ option.label }}</span
+        >
+        <span class="option-value text-gray-900">{{ option.text }}</span>
+      </button>
     </div>
   </div>
 </template>
 
-<style scoped>
-.question-container {
-  margin-top: 20px;
-}
+<script setup>
+import { ref } from 'vue'
 
-.question {
-  font-size: 40px;
-  margin-bottom: 20px;
-}
+const emit = defineEmits(['selectOption'])
 
-.option {
-  display: flex;
-  margin-bottom: 20px;
-  cursor: pointer;
-}
+const { question } = defineProps({
+  question: Array,
 
-.option-label {
-  background-color: brown;
-  width: 50px;
-  height: 50px;
-  font-size: 30px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+})
 
-.option-value {
-  background-color: rgb(69, 56, 56);
-  width: 100%;
-  font-size: 30px;
-  padding: 0 20px;
+const selectedOption = ref(null)
+
+const selectOption = (id, isCorrect) => {
+  selectedOption.value = id
+  emit('selectOption', isCorrect)
 }
-</style>
+</script>

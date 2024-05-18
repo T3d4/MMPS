@@ -1,46 +1,38 @@
-<script setup>
-import { useRouter } from "vue-router";
-
-const router = useRouter();
-const { quiz } = defineProps(["quiz"]);
-
-const navigateToQuiz = () => {
-  router.push(`/quiz/${quiz.id}`);
-};
-</script>
-
 <template>
-  <div class="card" @click="navigateToQuiz">
-    <img :src="quiz.img" alt="" />
-    <div class="card-text">
-      <h2>{{ quiz.name }}</h2>
-      <p>{{ quiz.questions.length }} Questions</p>
+  <router-link :to="`/quiz/${quiz.id}`" class="block">
+    <div
+      class="card relative shadow-inner shadow-slate-700 bg-white rounded-lg overflow-hidden transform transition-all duration-300 hover:shadow-xl mx-2 p-4 flex flex-col items-start justify-between"
+    >
+      <div class="mb-2">
+        <h2 class="text-lg font-semibold text-gray-900">{{ quiz.name }}</h2>
+        <p v-if="quiz.course" class="text-sm text-gray-700">Course: {{ quiz.course }}</p>
+      </div>
+
+      <div class="card-content">
+        <p class="text-sm text-gray-600">
+          {{ quiz.questions.length }} Questions
+        </p>
+        <div v-if="quiz.status" class="text-xs text-gray-500 mt-1">
+          Status: {{ quiz.status }}
+        </div>
+      </div>
     </div>
-  </div>
+  </router-link>
 </template>
+
+<script setup>
+import { defineProps } from 'vue';
+
+defineProps({
+  quiz: Object
+});
+</script>
 
 <style scoped>
 .card {
-  width: 310px;
+  width: 300px; 
   overflow: hidden;
-  border-radius: 3%;
-  box-shadow: 1px 1px 1px rgb(62, 61, 61);
-  margin-bottom: 35px;
-  margin-right: 20px;
+  margin-bottom: 35px; 
   cursor: pointer;
-}
-
-.card img {
-  width: 100%;
-  height: 190px;
-  margin: 0;
-}
-
-.card .card-text {
-  padding: 0 5px;
-}
-
-.card .card-text h2 {
-  font-weight: bold;
 }
 </style>

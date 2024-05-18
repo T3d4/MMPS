@@ -1,6 +1,6 @@
 <template>
   <div
-    class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-900 to-green-900 overflow-y-auto"
+    class="min-h-screen flex items-center justify-center bg-slate-800 overflow-y-auto"
   >
     <div class="bg-white bg-opacity-90 p-8 rounded shadow-md max-w-md w-full overflow-hidden">
       <h2 class="text-2xl font-bold text-gray-900 mb-4 text-center">Account Login</h2>
@@ -66,12 +66,12 @@
 
 <script setup>
 import { reactive, ref } from 'vue'
-import axios from 'axios'
+// import axios from 'axios'
 import router from '../router'
 
-const base = axios.create({
-  baseURL: 'https://medboard.onrender.com/api/v1' // replace on production env
-})
+// const base = axios.create({
+//   baseURL: 'https://medboard.onrender.com/api/v1' // replace on production env
+// })
 
 const login = reactive({})
 const passwordVisible = ref(false)
@@ -81,19 +81,20 @@ const togglePasswordVisibility = () => {
 }
 
 const loginUser = () => {
-  base
-    .post('/login', login)
-    .then((result) => {
-      // Handle successful signup (e.g., redirect to login page)
-      if (result.accesstkn) {
-        router.push('/home')
-      } else {
-        router.push('/')
-      }
-    })
-    .catch((err) => {
-      console.log(err)
-      // Handle signup errors
-    })
+    router.push('/quizes')
+  // base
+  //   .post('/login', login)
+  //   .then((result) => {
+  //     // Handle successful signup (e.g., redirect to login page)
+  //     if (!result.accesstkn) {
+      
+  //     } else {
+  //       router.push('/')
+  //     }
+  //   })
+  //   .catch((err) => {
+  //     console.log(err)
+  //     // Handle signup errors
+  //   })
 }
 </script>
