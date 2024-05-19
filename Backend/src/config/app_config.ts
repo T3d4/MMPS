@@ -15,7 +15,7 @@ export const app: Application = express();
 // Set up CORS for HTTP requests
 app.use(
     cors({
-        origin: ["http://localhost:3000", "http://127.0.0.1:3000", "*"],
+        origin: ["http://localhost:5173", "http://127.0.0.1:3000", "*"],
         methods: ["POST, GET, PUT, PATCH, DELETE"],
         credentials: true,
         exposedHeaders: ["Authorization"]
@@ -31,7 +31,7 @@ app.use(morgan("dev"));
 app.use(router)
 
 // Serve face-api.js models
-app.use('/models', express.static(path.join(__dirname, 'public/models')))
+app.use('/models', express.static(path.join(__dirname, '../public/models')))
 
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/user", userRouter);

@@ -28,7 +28,7 @@ const userSchema = new Schema<IUser, IUserMethods>(
             type: String,
         },
         faceDescriptor: {
-            type: [Number],
+            type: Object,
             required: true
         },
     },
