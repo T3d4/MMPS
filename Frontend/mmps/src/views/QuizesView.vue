@@ -32,7 +32,7 @@ import Card from '../components/CardComponent.vue'
 import quizData from '../data/quizes.json'
 
 const quizes = ref(quizData)
-const selectedCategory = ref('All')
+const selectedCategory = ref('All') // New ref to track the selected category
 
 // Computed property for filtering quizes based on category and search
 const filteredQuizes = computed(() => {
@@ -49,3 +49,32 @@ const categories = computed(() => {
   return ['All', ...uniqueCategories] // Add 'All' option
 })
 </script>
+
+<style scoped>
+header {
+  margin-top: 30px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+}
+
+header h1 {
+  font-weight: bold;
+  margin-right: 30px;
+}
+
+header input {
+  border: none;
+  background-color: rgba(255, 255, 255, 0.737);
+  border-radius: 5px;
+  padding: 5px;
+}
+
+.cards-container {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 30px;
+}
+
+/* CARD */
+</style>
