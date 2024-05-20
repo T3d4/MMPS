@@ -75,7 +75,7 @@
           </div>
         </div>
 
-        <div v-if="showCamera" class="mt-4" ref="faceCaptureSection">
+        <div v-if="showCamera" v-if="showCamera" class="mt-4" ref="faceCaptureSection" ref="faceCaptureSection">
           <label class="block text-sm font-medium text-gray-700 mb-2">Face Capture</label>
           <div :class="distanceClass" class="border rounded-md relative">
             <video id="video" class="w-full" ref="video" autoplay></video>
@@ -88,8 +88,30 @@
             Position your face within the frame.
           </p>
           <p v-if="errorMessage" class="text-sm text-red-500 ml-2">{{ errorMessage }}</p>
+          <div :class="distanceClass" class="border rounded-md relative">
+            <video id="video" class="w-full" ref="video" autoplay></video>
+            <div
+              v-if="showFaceGuide"
+              class="absoluteinset-0 flex items-center justify-center pointer-events-none"
+            ></div>
+          </div>
+          <p v-if="showFaceGuide" class="text-gray-600 mt-2 text-center">
+            Position your face within the frame.
+          </p>
           <button
             @click="captureFace"
+            type="button"
+            :class="{ 'opacity-50 cursor-not-allowed': faceCaptured }"
+            :disabled="faceCaptured"
+            class="mt-2 w-full py-2 px-4 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
+          >
+            {{ faceCaptured ? 'Face Captured Successfully' : 'Capture Face' }}
+          </button>
+        </div>
+        <div v-else>
+          <p v-if="captureMessage" class="text-sm text-red-500 ml-2">{{ captureMessage }}</p>
+          <button
+            @click="initFaceCapture"
             type="button"
             :class="{ 'opacity-50 cursor-not-allowed': faceCaptured }"
             :disabled="faceCaptured"
