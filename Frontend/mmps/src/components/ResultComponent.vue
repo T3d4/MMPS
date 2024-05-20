@@ -39,6 +39,7 @@
     </div>
     <div class="my-8 flex justify-center">
       <RouterLink
+        @click="revertTimerState()"
         to="/quizes"
         class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600 transition duration-200 mr-4"
         >Go Back</RouterLink
@@ -55,7 +56,7 @@
 
 <script setup>
 import { computed } from 'vue'
-import { timeTaken } from '@/global_state/state'
+import { timeLeft, timeTaken } from '@/global_state/state'
 
 const props = defineProps({
   numberOfCorrectAnswers: Number,
@@ -64,7 +65,12 @@ const props = defineProps({
   yourAnswers: Array
 })
 
-// Function to format time taken (e.g., in minutes and seconds)
+function revertTimerState() {
+  timeLeft.time = 120
+  timeTaken.time = 0
+}
+
+// Function to format time taken
 function formatTimeTaken(seconds) {
   const minutes = Math.floor(seconds / 60)
   const remainingSeconds = seconds % 60

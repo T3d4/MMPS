@@ -33,8 +33,7 @@ import { ref } from 'vue'
 const emit = defineEmits(['selectOption'])
 
 const { question } = defineProps({
-  question: Array,
-
+  question: Array
 })
 
 const selectedOption = ref(null)
