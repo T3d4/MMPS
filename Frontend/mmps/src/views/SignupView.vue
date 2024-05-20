@@ -2,7 +2,7 @@
   <div class="h-screen flex items-center justify-center bg-slate-800 overflow-y-auto">
     <div
       ref="formContainer"
-      class="bg-white bg-opacity-90 p-8 rounded shadow-md max-w-md w-full overflow-hidden my-4 h-[80%] overflow-y-auto"
+      class="min-w-[300px] sm:px-8 bg-white bg-opacity-90 p-8 rounded shadow-md max-w-md w-full overflow-hidden my-4 max-h-[80dvh] overflow-y-auto"
     >
       <h2 class="text-2xl font-bold text-gray-900 mb-4 text-center sm:text-xl">Create Account</h2>
 
@@ -79,14 +79,15 @@
           <label class="block text-sm font-medium text-gray-700 mb-2">Face Capture</label>
           <div :class="distanceClass" class="border rounded-md relative">
             <video id="video" class="w-full" ref="video" autoplay></video>
-            <div
+            <!-- <div
               v-if="showFaceGuide"
               class="absoluteinset-0 flex items-center justify-center pointer-events-none"
-            ></div>
+            ></div> -->
           </div>
           <p v-if="showFaceGuide" class="text-gray-600 mt-2 text-center">
             Position your face within the frame.
           </p>
+          <p v-if="errorMessage" class="text-sm text-red-500 ml-2">{{ errorMessage }}</p>
           <button
             @click="captureFace"
             type="button"
@@ -99,12 +100,15 @@
         </div>
         <div v-else>
           <p v-if="captureMessage" class="text-sm text-red-500 ml-2">{{ captureMessage }}</p>
+          <p v-if="errorMessage" class="text-sm text-red-500 ml-2">{{ errorMessage }}</p>
           <button
             @click="initFaceCapture"
             type="button"
+            :disabled="faceCaptured"
+            :class="{ 'opacity-50 cursor-not-allowed': faceCaptured }"
             class="mt-2 w-full py-2 px-4 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
           >
-            Capture Face
+            {{ faceCaptured ? 'Face Captured Successfully' : 'Capture Face' }}
           </button>
         </div>
 
@@ -129,7 +133,7 @@
 </template>
 
 <script setup>
-import { reactive, ref, onMounted, onBeforeUnmount, watch } from 'vue'
+import { reactive, ref, onBeforeUnmount, watch, watchEffect } from 'vue'
 import axios from 'axios'
 import * as faceapi from 'face-api.js'
 import router from '../router'
@@ -139,32 +143,29 @@ const base = axios.create({
   // replace on production env
 })
 
+// for authentication page
 const confirmPassword = ref('')
+const passwordVisible = ref(false)
+const confirmPasswordVisible = ref(false)
+
+// for facial auth on auth-page
 const showCamera = ref(false)
 const distanceClass = ref('')
 const showFaceGuide = ref(true) // Show the face guide initially
+const errorMessage = ref(null)
 const captureMessage = ref(null)
+const video = ref(null)
+const faceCaptureSection = ref(null)
+const faceCaptured = ref(false) // Track if face is capture
+let faceCaptureInterval
 
+// signup form
 const signup = reactive({
   name: '',
   email: '',
   password: '',
   faceDescriptor: null
 })
-
-let faceCaptureInterval
-const passwordVisible = ref(false)
-const confirmPasswordVisible = ref(false)
-const video = ref(null)
-const faceCaptureSection = ref(null)
-const faceCaptured = ref(false) // Track if face is capture
-
-const initFaceCapture = async () => {
-  showCamera.value = true
-  await loadModels() // Load models when the button is clicked
-  startVideo() // Start the video only when the button is clicked
-  scrollToFaceCaptureSection() // Scroll to the face capture section
-}
 
 const togglePasswordVisibility = () => {
   passwordVisible.value = !passwordVisible.value
@@ -174,13 +175,55 @@ const toggleConfirmPasswordVisibility = () => {
   confirmPasswordVisible.value = !confirmPasswordVisible.value
 }
 
+// loads models require for facial auth...
 const loadModels = async () => {
   await faceapi.nets.ssdMobilenetv1.loadFromUri('http://localhost:8900/models')
   await faceapi.nets.faceLandmark68Net.loadFromUri('http://localhost:8900/models')
   await faceapi.nets.faceRecognitionNet.loadFromUri('http://localhost:8900/models')
 }
 
-watch(
+// starts the camera for facial auth...
+const startVideo = () => {
+  const constraints = (window.constraints = { audio: false, video: true })
+  navigator.mediaDevices
+    .getUserMedia(constraints)
+    .then((stream) => {
+      if (video.value) {
+        // Make sure video element exists
+        video.value.srcObject = stream
+      }
+    })
+    .catch((error) => {
+      console.error('Error accessing camera:', error)
+    })
+}
+
+// Scrolls the capture section into view
+const scrollToFaceCaptureSection = () => {
+  if (faceCaptureSection.value) {
+    faceCaptureSection.value.scrollIntoView({ behavior: 'smooth' })
+  }
+}
+
+// face capture button action
+const initFaceCapture = async () => {
+  await loadModels().catch((err) => {
+    if (!err) {
+      errorMessage.value = null
+      startVideo()
+      showCamera.value = true
+      scrollToFaceCaptureSection()
+    } else {
+      errorMessage.value = 'Bad network connection... Try again'
+      console.log(err)
+      showCamera.value = false
+      return
+    }
+  })
+}
+
+// provide guide for user for face placement
+watchEffect(
   () =>
     faceapi
       .detectSingleFace(video.value, new faceapi.TinyFaceDetectorOptions())
@@ -201,7 +244,7 @@ watch(
   }
 )
 
-// Close the camera when navigating away from the page
+// Close the camera when navigating away from the page... ish
 onBeforeUnmount(() => {
   if (video.value && video.value.srcObject) {
     const stream = video.value.srcObject
@@ -210,28 +253,13 @@ onBeforeUnmount(() => {
   }
 })
 
-const startVideo = () => {
-  const constraints = (window.constraints = { audio: false, video: true })
-  navigator.mediaDevices
-    .getUserMedia(constraints)
-    .then((stream) => {
-      if (video.value) {
-        // Make sure video element exists
-        video.value.srcObject = stream
-      }
-    })
-    .catch((error) => {
-      console.error('Error accessing camera:', error)
-    })
-}
-
-onMounted(async () => {
-  // ... (load models and start video only when showCamera is true)
-  if (showCamera.value) {
-    await loadModels()
-    startVideo()
-  }
-})
+// onMounted(async () => {
+//   // ... (load models and start video only when showCamera is true)
+//   if (showCamera.value) {
+//     await loadModels()
+//     startVideo()
+//   }
+// })
 
 const captureFace = async () => {
   const detection = await faceapi
@@ -246,12 +274,13 @@ const captureFace = async () => {
     showCamera.value = false
   } else {
     captureMessage.value = 'Face not detected, please try again.'
-    faceCaptured.value = false;
-    showCamera.value = false;
+    faceCaptured.value = false
+    showCamera.value = false
   }
 }
 
 watch(showCamera, async (newShowCamera) => {
+  console.log(newShowCamera)
   if (newShowCamera) {
     await loadModels()
     startVideo()
@@ -262,12 +291,6 @@ watch(showCamera, async (newShowCamera) => {
     captureMessage.value = null // Clear the message when closing camera
   }
 })
-
-const scrollToFaceCaptureSection = () => {
-  if (faceCaptureSection.value) {
-    faceCaptureSection.value.scrollIntoView({ behavior: 'smooth' })
-  }
-}
 
 const signupUser = () => {
   if (!signup.faceDescriptor) {
