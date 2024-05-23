@@ -1,4 +1,5 @@
 <template>
+  <!-- Result Component -->
   <div class="results w-full bg-white rounded shadow-md p-8 h-full">
     <div class="flex">
       <div class="w-1/2">

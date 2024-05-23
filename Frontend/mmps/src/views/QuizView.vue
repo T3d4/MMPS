@@ -1,14 +1,23 @@
 <template>
+  <!-- Quiz View -->
   <div class="bg-slate-800 max-h-screen h-screen flex flex-col" v-if="quiz">
     <!-- <div class="h-[20%] w-full"> -->
     <QuizHeader :quiz="quiz" :question-status="questionStatus" :bar-percentage="barPercentage" />
 
     <div class="flex-1 flex justify-center items-center">
       <div v-if="!showResults" class="w-[50%] flex items-center justify-center">
-        <Question
-          :question="quiz.questions[currentQuestionIndex]"
-          @selectOption="onOptionSelected"
-        />
+        <div class="grid grid-flow-col">
+          <Question
+            :question="quiz.questions[currentQuestionIndex]"
+            @selectOption="onOptionSelected"
+          />
+          <!-- Sidebar for navigating questions -->
+          <QuestionSidebar
+            :questions="quiz.questions"
+            :current-question-index="currentQuestionIndex"
+            @navigateToQuestion="navigateToQuestion"
+          />
+        </div>
       </div>
       <Result
         v-else
@@ -28,6 +37,7 @@ import { ref, computed, reactive, watchEffect, onBeforeUnmount } from 'vue'
 import Question from '@/components/QuestionComponent.vue'
 import QuizHeader from '@/components/QuizHeaderComponent.vue'
 import Result from '@/components/ResultComponent.vue'
+import QuestionSidebar from '@/components/QuestionSidebarComponent.vue'
 import { useRoute } from 'vue-router'
 import quizes from '@/data/quizes.json'
 import { timeLeft, timeTaken } from '@/global_state/state'
@@ -62,6 +72,10 @@ const onOptionSelected = (isCorrect) => {
   }
 
   currentQuestionIndex.value++
+}
+
+const navigateToQuestion = (index) => {
+  currentQuestionIndex.value = index
 }
 
 const restartQuiz = () => {

@@ -1,6 +1,7 @@
 <template>
+  <!-- Question Component -->
   <div
-    class="question-container rounded-md shadow-md bg-white p-6 mb-4 w-full max-w-md sm:max-w-lg h-full"
+    class="question-container mx-auto rounded-md shadow-md bg-white p-6 mb-4 w-full max-w-md sm:max-w-lg h-full"
   >
     <h1 class="question text-2xl font-semibold text-gray-800 mb-4">
       {{ question.text }}
