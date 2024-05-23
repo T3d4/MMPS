@@ -1,8 +1,10 @@
 <template>
-  <div class="h-screen flex items-center justify-center bg-slate-800 overflow-y-auto">
+  <!-- signup view -->
+  <div
+    class="h-screen flex items-center justify-center bg-slate-800 overflow-y-auto transition-all"
+  >
     <div
-      ref="formContainer"
-      class="bg-white bg-opacity-90 p-8 rounded shadow-md max-w-md w-full overflow-hidden my-4 max-h-[90dvh] h-fit overflow-y-auto"
+      class="bg-white bg-opacity-90 p-8 rounded shadow-md max-w-md w-full my-4 max-h-[90dvh] overflow-y-auto"
     >
       <h2 class="text-2xl font-bold text-gray-900 mb-4 text-center sm:text-xl">Create Account</h2>
 
@@ -72,7 +74,8 @@
                   'border-green-500': passwordsMatch && confirmPassword.confirmPwd !== '',
                   'border-indigo-500': inputFocused && passwordsMatch, // When focused and passwords match
                   'border-red-500':
-                    (!passwordsMatch && confirmPassword.confirmPwd !== '') || (inputFocused && !passwordsMatch)
+                    (!passwordsMatch && confirmPassword.confirmPwd !== '') ||
+                    (inputFocused && !passwordsMatch)
                 }
               ]"
             />
@@ -87,9 +90,14 @@
         </div>
 
         <div v-if="showCamera" class="mt-4" ref="faceCaptureSection">
-          <label class="block text-sm font-medium text-gray-700 mb-2">Face Capture</label>
-          <div :class="distanceClass" class="border rounded-md relative">
-            <video id="video" class="w-full" ref="video" autoplay></video>
+          <!-- <label class="block text-sm font-medium text-gray-700 mb-2">Face Capture</label> -->
+          <div :class="distanceClass" class="rounded-lg relative">
+            <video
+              id="video"
+              class="w-2/3 mx-auto rounded-lg border-[3px] border-indigo-500 shadow-md"
+              ref="video"
+              autoplay
+            ></video>
             <div
               v-if="showFaceGuide"
               class="absoluteinset-0 flex items-center justify-center pointer-events-none"
@@ -101,7 +109,6 @@
         </div>
 
         <div class="!mt-2">
-          <p v-if="captureMessage" class="text-sm text-red-500 ml-2 mt-0">{{ captureMessage }}</p>
           <p v-if="errorMessage" class="text-sm text-red-500 !m-0 !ml-2">{{ errorMessage }}</p>
         </div>
 
@@ -112,15 +119,32 @@
             @click="initFaceCapture"
             type="button"
             :disabled="faceCaptured"
-            :class="{ 'opacity-50 cursor-not-allowed': faceCaptured }"
+            :class="{
+              'opacity-40 cursor-not-allowed': faceCaptured,
+              'animate-pulse opacity-100 cursor-not-allowed': capturing
+            }"
             class="w-full py-2 px-4 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
           >
-            {{ faceCaptured ? 'Face Captured Successfully' : 'Capture Face' }}
+            {{
+              faceCaptured
+                ? 'Face Captured Successfully'
+                : capturing
+                  ? 'Capturing...'
+                  : 'Capture Face'
+            }}
           </button>
         </div>
 
         <div class="w-full">
           <button
+            :disabled="
+              () => {
+                faceCaptured != true
+              }
+            "
+            :class="{
+              'opacity-40 cursor-not-allowed': !faceCaptured,
+            }"
             type="submit"
             class="flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 w-full"
           >
@@ -140,7 +164,7 @@
 </template>
 
 <script setup>
-import { reactive, ref, onBeforeUnmount, watch, onMounted, watchEffect, computed } from 'vue'
+import { reactive, ref, onBeforeUnmount, watch, computed } from 'vue'
 import axios from 'axios'
 import * as faceapi from 'face-api.js'
 import router from '../router'
@@ -168,13 +192,14 @@ const inputFocused = ref(false)
 const showCamera = ref(false)
 const distanceClass = ref('')
 const showFaceGuide = ref(true) // Show the face guide initially
-let faceCaptureInterval = null
 const video = ref(null)
 const faceCaptureSection = ref(null)
-const faceCaptured = ref(false) // Track if face is captured
+const faceCaptured = ref(false)
+const capturing = ref(false)
+let faceCaptureInterval = null
+let faceCaptureTimeout
 
 // message variables
-const captureMessage = ref(null)
 const errorMessage = ref(null)
 
 const togglePasswordVisibility = () => {
@@ -191,58 +216,31 @@ const loadModels = async () => {
   await faceapi.nets.faceRecognitionNet.loadFromUri('http://localhost:8900/models')
 }
 
-const initFaceCapture = async () => {
-  await loadModels().catch((err) => {
-    if (!err) {
-      startVideo() // Start the video only when the button is clicked
-      showCamera.value = true
-      scrollToFaceCaptureSection() // Scroll to the face capture section
-      captureFace()
-    } else {
-      console.log(err)
-      errorMessage.value = 'Poor network connection... try again'
-    }
-  }) // Load models when the button is clicked
+const initFaceCapture = () => {
+  capturing.value = true
+  showCamera.value = true
+  errorMessage.value = null
 }
 
 const captureFace = async () => {
-  const detection = await faceapi
-    .detectSingleFace(video.value)
-    .withFaceLandmarks()
-    .withFaceDescriptor()
-
-  if (detection) {
-    signup.faceDescriptor = detection.descriptor
-    faceCaptured.value = true
-    clearInterval(faceCaptureInterval) // Clear the interval when face is captured
-    showCamera.value = false
-    stopVideo()
-  } else {
-    captureMessage.value = 'Face not detected, please try again.'
-    faceCaptured.value = false
-  }
-}
-
-watchEffect(
-  () =>
-    faceapi
-      .detectSingleFace(video.value, new faceapi.TinyFaceDetectorOptions())
+  faceCaptureInterval = setInterval(async () => {
+    const detection = await faceapi
+      .detectSingleFace(video.value)
       .withFaceLandmarks()
-      .withFaceDescriptor(),
-  (detections) => {
-    if (detections) {
-      const box = faceapi.getMediaDimensions(video.value)
-      const faceBox = detections.detection.box
-      const faceAreaRatio = (faceBox.width * faceBox.height) / (box.width * box.height)
+      .withFaceDescriptor()
 
-      showFaceGuide.value = faceAreaRatio < 0.1 || faceAreaRatio > 0.3
-      distanceClass.value = showFaceGuide.value ? 'border-red-500' : 'border-green-500'
+    if (detection) {
+      showCamera.value = false
+      clearInterval(faceCaptureInterval)
+      signup.faceDescriptor = detection.descriptor
+      errorMessage.value = null
+      faceCaptured.value = true
+      stopVideo()
     } else {
-      showFaceGuide.value = true
-      distanceClass.value = 'border-red-500'
+      faceCaptured.value = false
     }
-  }
-)
+  }, 750)
+}
 
 // Close the camera when navigating away from the page
 onBeforeUnmount(() => {
@@ -258,16 +256,17 @@ const stopVideo = () => {
     const stream = video.value.srcObject
     const tracks = stream.getTracks()
     tracks.forEach((track) => track.stop())
+    video.value.srcObject = null
   }
 }
 
+// create and export in a seperate file
 const startVideo = () => {
   const constraints = (window.constraints = { audio: false, video: true })
   navigator.mediaDevices
     .getUserMedia(constraints)
     .then((stream) => {
       if (video.value) {
-        // Make sure video element exists
         video.value.srcObject = stream
       }
     })
@@ -276,26 +275,46 @@ const startVideo = () => {
     })
 }
 
-onMounted(async () => {
-  // ... (load models and start video only when showCamera is true)
-  await loadModels()
-})
-
 watch(showCamera, async (newShowCamera) => {
+  const checkFaceTimeout = () => {
+    if (faceCaptured.value) {
+      clearTimeout(faceCaptureTimeout)
+      showCamera.value = false
+      capturing.value = false
+      return true
+    }
+    return false
+  }
+
   if (newShowCamera) {
-    await loadModels()
+    if (!loadModels()) {
+      await loadModels()
+    }
     startVideo()
-    faceCaptureInterval = setInterval(captureFace, 800) // Check for face every 500ms
-  } else {
-    // When showCamera is false, clear the interval to stop face detection.
+    setTimeout(() => scrollToFaceCaptureSection(), 50)
+    captureFace()
+
+    faceCaptureTimeout = setTimeout(() => {
+      if (!checkFaceTimeout()) {
+        clearInterval(faceCaptureInterval)
+        showCamera.value = false
+        capturing.value = false
+        errorMessage.value = 'Failed to capture face... try again'
+        stopVideo()
+      }
+    }, 15000)
+  } else if (checkFaceTimeout()) {
     clearInterval(faceCaptureInterval)
-    captureMessage.value = null // Clear the message when closing camera
   }
 })
 
 const scrollToFaceCaptureSection = () => {
+  console.log(faceCaptureSection.value)
+  // Use nextTick to ensure DOM update before scrolling
   if (faceCaptureSection.value) {
     faceCaptureSection.value.scrollIntoView({ behavior: 'smooth' })
+  } else {
+    console.warn('Face capture section not found.')
   }
 }
 
