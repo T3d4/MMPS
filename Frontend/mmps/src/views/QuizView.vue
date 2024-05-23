@@ -24,7 +24,7 @@
 </template>
 
 <script setup>
-import { ref, computed, reactive, onMounted } from 'vue'
+import { ref, computed, reactive, watchEffect, onBeforeUnmount } from 'vue'
 import Question from '@/components/QuestionComponent.vue'
 import QuizHeader from '@/components/QuizHeaderComponent.vue'
 import Result from '@/components/ResultComponent.vue'
@@ -33,12 +33,13 @@ import quizes from '@/data/quizes.json'
 import { timeLeft, timeTaken } from '@/global_state/state'
 
 const route = useRoute()
-const quizId = parseInt(route.params.id)
-const quiz = quizes.find((q) => q.id === quizId)
+const quizId = ref(parseInt(route.params.id))
+const quiz = quizes.find((q) => q.id === quizId.value)
 const showResults = ref(false)
 const currentQuestionIndex = ref(0)
 const userAnswers = reactive([])
 const numberOfCorrectAnswers = ref(0)
+let timerInterval = null
 
 const questionStatus = computed(() => `${currentQuestionIndex.value}/${quiz.questions.length}`)
 const barPercentage = computed(
@@ -57,6 +58,7 @@ const onOptionSelected = (isCorrect) => {
 
   if (quiz.questions.length - 1 === currentQuestionIndex.value) {
     showResults.value = true
+    clearInterval(timerInterval)
   }
 
   currentQuestionIndex.value++
@@ -67,17 +69,30 @@ const restartQuiz = () => {
   userAnswers.splice(0, userAnswers.length)
   numberOfCorrectAnswers.value = 0
   showResults.value = false
+  timeLeft.time = 120
+  timeTaken.time = 0
 }
 
-onMounted(() => {
-  const timerInterval = setInterval(() => {
-    if (timeLeft.time > 0 && !showResults.value) {
-      timeLeft.time--
-      timeTaken.time++
-    } else {
-      clearInterval(timerInterval)
-      showResults.value = true // Show results if time runs out
-    }
-  }, 1000) // Update every second
+// This lovely baby is who you call on to monitor reactive states
+watchEffect(() => {
+  console.log(quizId.value)
+  if (quizId.value > 0 && !showResults.value) {
+    // Start the timer
+    timerInterval = setInterval(() => {
+      if (timeLeft.time > 0) {
+        timeLeft.time--
+        timeTaken.time++
+      } else {
+        clearInterval(timerInterval)
+        showResults.value = true
+      }
+    }, 1000) // Update every second
+  } else {
+    // Stop the timer
+    clearInterval(timerInterval)
+  }
+})
+onBeforeUnmount(() => {
+  clearInterval(timerInterval)
 })
 </script>

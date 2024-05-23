@@ -18,8 +18,9 @@
     </div>
 
     <div class="flex flex-wrap mt-8">
-      <Card v-for="quiz in filteredQuizes" :key="quiz.id" :quiz="quiz" />
+      <Card v-for="quiz in filteredQuizes" :key="quiz.id" :quiz="quiz" @quizSelected="onSelectQuiz"/>
     </div>
+    <FacialRecognitionModal :show="showModal" @close="onClose" @verified="onFaceVerified"/>
     <p v-if="filteredQuizes.length === 0" class="text-gray-600 mt-4">
       No quizzes found in this category.
     </p>
@@ -28,11 +29,17 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import Card from '../components/CardComponent.vue'
-import quizData from '../data/quizes.json'
+// import { verified } from '@/global_state/state';
+import router from '@/router'
+import Card from '@/components/CardComponent.vue'
+import quizData from '@/data/quizes.json'
+import FacialRecognitionModal from '@/components/FacialRecoginitionModal.vue'
 
 const quizes = ref(quizData)
 const selectedCategory = ref('All') // New ref to track the selected category
+const showModal = ref(false)
+// const quizId = ref(null)
+
 
 // Computed property for filtering quizes based on category and search
 const filteredQuizes = computed(() => {
@@ -43,38 +50,22 @@ const filteredQuizes = computed(() => {
   return filtered
 })
 
+const onSelectQuiz = () => {
+  showModal.value = true
+}
+
+const onClose = () =>{
+  showModal.value = false
+}
+
 // Get unique categories from quiz data
 const categories = computed(() => {
   const uniqueCategories = new Set(quizes.value.map((quiz) => quiz.name))
   return ['All', ...uniqueCategories] // Add 'All' option
 })
+
+// Function to handle the "verified" event from the modal
+const onFaceVerified = (quizId) => {
+  router.push({ name: 'Quiz', params: { id: quizId } });
+};
 </script>
-
-<style scoped>
-header {
-  margin-top: 30px;
-  margin-bottom: 10px;
-  display: flex;
-  align-items: center;
-}
-
-header h1 {
-  font-weight: bold;
-  margin-right: 30px;
-}
-
-header input {
-  border: none;
-  background-color: rgba(255, 255, 255, 0.737);
-  border-radius: 5px;
-  padding: 5px;
-}
-
-.cards-container {
-  display: flex;
-  flex-wrap: wrap;
-  margin-top: 30px;
-}
-
-/* CARD */
-</style>
