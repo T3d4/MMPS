@@ -1,7 +1,6 @@
 <template>
   <!-- Quiz View -->
   <div class="bg-slate-800 max-h-screen h-screen flex flex-col" v-if="quiz">
-    <!-- <div class="h-[20%] w-full"> -->
     <QuizHeader :quiz="quiz" :question-status="questionStatus" :bar-percentage="barPercentage" />
 
     <div class="flex-1 flex justify-center items-center">
@@ -15,7 +14,9 @@
           <QuestionSidebar
             :questions="quiz.questions"
             :current-question-index="currentQuestionIndex"
+            :answered-questions="answeredQuestions"
             @navigateToQuestion="navigateToQuestion"
+            @submit="showConfirmationModal = true"
           />
         </div>
       </div>
@@ -30,6 +31,11 @@
     </div>
   </div>
   <div v-else class="flex items-center justify-center min-h-screen">Quiz not found.</div>
+  <ConfirmationModal
+    v-if="showConfirmationModal"
+    @confirm="submitQuiz"
+    @cancel="showConfirmationModal = false"
+  />
 </template>
 
 <script setup>
@@ -38,6 +44,7 @@ import Question from '@/components/QuestionComponent.vue'
 import QuizHeader from '@/components/QuizHeaderComponent.vue'
 import Result from '@/components/ResultComponent.vue'
 import QuestionSidebar from '@/components/QuestionSidebarComponent.vue'
+import ConfirmationModal from '@/components/ConfirmationModalComponent.vue'
 import { useRoute } from 'vue-router'
 import quizes from '@/data/quizes.json'
 import { timeLeft, timeTaken } from '@/global_state/state'
@@ -48,13 +55,13 @@ const quiz = quizes.find((q) => q.id === quizId.value)
 const showResults = ref(false)
 const currentQuestionIndex = ref(0)
 const userAnswers = reactive([])
+const answeredQuestions = reactive([])
 const numberOfCorrectAnswers = ref(0)
 let timerInterval = null
+const showConfirmationModal = ref(false)
 
-const questionStatus = computed(() => `${currentQuestionIndex.value}/${quiz.questions.length}`)
-const barPercentage = computed(
-  () => `${(currentQuestionIndex.value / quiz.questions.length) * 100}%`
-)
+const questionStatus = computed(() => `${currentQuestionIndex.value + 1}/${quiz.questions.length}`)
+const barPercentage = computed(() => `${(answeredQuestions.length / quiz.questions.length) * 100}%`)
 
 const onOptionSelected = (isCorrect) => {
   userAnswers.push(
@@ -66,12 +73,23 @@ const onOptionSelected = (isCorrect) => {
     numberOfCorrectAnswers.value++
   }
 
+  if (!answeredQuestions.includes(currentQuestionIndex.value)) {
+    answeredQuestions.push(currentQuestionIndex.value)
+  }
+
+  // answeredQuestions.value = userAnswers.length
+
   if (quiz.questions.length - 1 === currentQuestionIndex.value) {
-    showResults.value = true
-    clearInterval(timerInterval)
+    currentQuestionIndex.value -= 1
   }
 
   currentQuestionIndex.value++
+}
+
+const submitQuiz = () => {
+  showResults.value = true
+  clearInterval(timerInterval)
+  showConfirmationModal.value = false
 }
 
 const navigateToQuestion = (index) => {
@@ -82,6 +100,7 @@ const restartQuiz = () => {
   currentQuestionIndex.value = 0
   userAnswers.splice(0, userAnswers.length)
   numberOfCorrectAnswers.value = 0
+  answeredQuestions.length = 0
   showResults.value = false
   timeLeft.time = 120
   timeTaken.time = 0

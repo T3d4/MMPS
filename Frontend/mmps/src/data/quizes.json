@@ -115,5 +115,540 @@
         "correctAnswer": "NaCl"
       }
     ]
+  },
+  {
+    "id": 4,
+    "name": "CSC 302",
+    "questions": [
+      {
+        "id": 1,
+        "text": "What is the time complexity of the binary search algorithm?",
+        "options": [
+          { "id": 1, "label": "A", "text": "O(n)", "isCorrect": false },
+          { "id": 2, "label": "B", "text": "O(n log n)", "isCorrect": false },
+          { "id": 3, "label": "C", "text": "O(log n)", "isCorrect": true },
+          { "id": 4, "label": "D", "text": "O(1)", "isCorrect": false }
+        ],
+        "correctAnswer": "O(log n)"
+      },
+      {
+        "id": 2,
+        "text": "Which sorting algorithm has the best average case time complexity?",
+        "options": [
+          { "id": 1, "label": "A", "text": "Bubble Sort", "isCorrect": false },
+          { "id": 2, "label": "B", "text": "Merge Sort", "isCorrect": true },
+          { "id": 3, "label": "C", "text": "Insertion Sort", "isCorrect": false },
+          { "id": 4, "label": "D", "text": "Selection Sort", "isCorrect": false }
+        ],
+        "correctAnswer": "Merge Sort"
+      },
+      {
+        "id": 3,
+        "text": "In object-oriented programming, what is encapsulation?",
+        "options": [
+          {
+            "id": 1,
+            "label": "A",
+            "text": "The ability to hide the internal state and require all interaction to be performed through an object's methods",
+            "isCorrect": true
+          },
+          {
+            "id": 2,
+            "label": "B",
+            "text": "The ability to define multiple methods with the same name but different parameters",
+            "isCorrect": false
+          },
+          {
+            "id": 3,
+            "label": "C",
+            "text": "The ability to use inherited methods",
+            "isCorrect": false
+          },
+          {
+            "id": 4,
+            "label": "D",
+            "text": "The ability to derive a class from another class",
+            "isCorrect": false
+          }
+        ],
+        "correctAnswer": "The ability to hide the internal state and require all interaction to be performed through an object's methods"
+      },
+      {
+        "id": 4,
+        "text": "What does the acronym 'API' stand for?",
+        "options": [
+          { "id": 1, "label": "A", "text": "Application Program Interface", "isCorrect": false },
+          { "id": 2, "label": "B", "text": "Application Programming Interface", "isCorrect": true },
+          { "id": 3, "label": "C", "text": "Applied Programming Interface", "isCorrect": false },
+          { "id": 4, "label": "D", "text": "Advanced Programming Interface", "isCorrect": false }
+        ],
+        "correctAnswer": "Application Programming Interface"
+      },
+      {
+        "id": 5,
+        "text": "Which of the following is a NoSQL database?",
+        "options": [
+          { "id": 1, "label": "A", "text": "MySQL", "isCorrect": false },
+          { "id": 2, "label": "B", "text": "MongoDB", "isCorrect": true },
+          { "id": 3, "label": "C", "text": "PostgreSQL", "isCorrect": false },
+          { "id": 4, "label": "D", "text": "SQLite", "isCorrect": false }
+        ],
+        "correctAnswer": "MongoDB"
+      },
+      {
+        "id": 6,
+        "text": "What does HTML stand for?",
+        "options": [
+          { "id": 1, "label": "A", "text": "HyperText Markup Language", "isCorrect": true },
+          {
+            "id": 2,
+            "label": "B",
+            "text": "Hyperlinks and Text Markup Language",
+            "isCorrect": false
+          },
+          { "id": 3, "label": "C", "text": "Home Tool Markup Language", "isCorrect": false },
+          { "id": 4, "label": "D", "text": "Hyperlinks Tool Markup Language", "isCorrect": false }
+        ],
+        "correctAnswer": "HyperText Markup Language"
+      },
+      {
+        "id": 7,
+        "text": "In computer networking, what does LAN stand for?",
+        "options": [
+          { "id": 1, "label": "A", "text": "Large Area Network", "isCorrect": false },
+          { "id": 2, "label": "B", "text": "Local Area Network", "isCorrect": true },
+          { "id": 3, "label": "C", "text": "Long Area Network", "isCorrect": false },
+          { "id": 4, "label": "D", "text": "Lightweight Area Network", "isCorrect": false }
+        ],
+        "correctAnswer": "Local Area Network"
+      },
+      {
+        "id": 8,
+        "text": "Which of the following is a feature of the Python programming language?",
+        "options": [
+          { "id": 1, "label": "A", "text": "Statically typed", "isCorrect": false },
+          { "id": 2, "label": "B", "text": "Low-level language", "isCorrect": false },
+          { "id": 3, "label": "C", "text": "Interpreted language", "isCorrect": true },
+          { "id": 4, "label": "D", "text": "Compiled language", "isCorrect": false }
+        ],
+        "correctAnswer": "Interpreted language"
+      },
+      {
+        "id": 9,
+        "text": "What is the main function of an operating system?",
+        "options": [
+          {
+            "id": 1,
+            "label": "A",
+            "text": "To provide a platform for applications to run on",
+            "isCorrect": true
+          },
+          { "id": 2, "label": "B", "text": "To compile code", "isCorrect": false },
+          { "id": 3, "label": "C", "text": "To manage web servers", "isCorrect": false },
+          { "id": 4, "label": "D", "text": "To provide internet access", "isCorrect": false }
+        ],
+        "correctAnswer": "To provide a platform for applications to run on"
+      },
+      {
+        "id": 10,
+        "text": "Which protocol is used for secure web browsing?",
+        "options": [
+          { "id": 1, "label": "A", "text": "HTTP", "isCorrect": false },
+          { "id": 2, "label": "B", "text": "FTP", "isCorrect": false },
+          { "id": 3, "label": "C", "text": "HTTPS", "isCorrect": true },
+          { "id": 4, "label": "D", "text": "SMTP", "isCorrect": false }
+        ],
+        "correctAnswer": "HTTPS"
+      },
+      {
+        "id": 11,
+        "text": "What is the primary purpose of the DNS in networking?",
+        "options": [
+          {
+            "id": 1,
+            "label": "A",
+            "text": "To translate domain names to IP addresses",
+            "isCorrect": true
+          },
+          { "id": 2, "label": "B", "text": "To manage network traffic", "isCorrect": false },
+          {
+            "id": 3,
+            "label": "C",
+            "text": "To provide security for network communications",
+            "isCorrect": false
+          },
+          {
+            "id": 4,
+            "label": "D",
+            "text": "To establish a connection between client and server",
+            "isCorrect": false
+          }
+        ],
+        "correctAnswer": "To translate domain names to IP addresses"
+      },
+      {
+        "id": 12,
+        "text": "What is the primary function of a router in a network?",
+        "options": [
+          {
+            "id": 1,
+            "label": "A",
+            "text": "To connect multiple devices within a LAN",
+            "isCorrect": false
+          },
+          {
+            "id": 2,
+            "label": "B",
+            "text": "To forward data packets between computer networks",
+            "isCorrect": true
+          },
+          {
+            "id": 3,
+            "label": "C",
+            "text": "To provide Wi-Fi access to devices",
+            "isCorrect": false
+          },
+          { "id": 4, "label": "D", "text": "To filter network traffic", "isCorrect": false }
+        ],
+        "correctAnswer": "To forward data packets between computer networks"
+      },
+      {
+        "id": 13,
+        "text": "Which of the following is an example of a high-level programming language?",
+        "options": [
+          { "id": 1, "label": "A", "text": "Assembly", "isCorrect": false },
+          { "id": 2, "label": "B", "text": "C++", "isCorrect": true },
+          { "id": 3, "label": "C", "text": "Machine Code", "isCorrect": false },
+          { "id": 4, "label": "D", "text": "VHDL", "isCorrect": false }
+        ],
+        "correctAnswer": "C++"
+      },
+      {
+        "id": 14,
+        "text": "In databases, what is a foreign key?",
+        "options": [
+          {
+            "id": 1,
+            "label": "A",
+            "text": "A key that uniquely identifies a record in the same table",
+            "isCorrect": false
+          },
+          {
+            "id": 2,
+            "label": "B",
+            "text": "A key that uniquely identifies a record in another table",
+            "isCorrect": true
+          },
+          {
+            "id": 3,
+            "label": "C",
+            "text": "A key that is used to index the database",
+            "isCorrect": false
+          },
+          {
+            "id": 4,
+            "label": "D",
+            "text": "A key that is used to encrypt data",
+            "isCorrect": false
+          }
+        ],
+        "correctAnswer": "A key that uniquely identifies a record in another table"
+      },
+      {
+        "id": 15,
+        "text": "Which of the following is not a type of machine learning?",
+        "options": [
+          { "id": 1, "label": "A", "text": "Supervised learning", "isCorrect": false },
+          { "id": 2, "label": "B", "text": "Unsupervised learning", "isCorrect": false },
+          { "id": 3, "label": "C", "text": "Reinforcement learning", "isCorrect": false },
+          { "id": 4, "label": "D", "text": "Instructed learning", "isCorrect": true }
+        ],
+        "correctAnswer": "Instructed learning"
+      }
+    ]
+  },
+  {
+    "id": 5,
+    "name": "CSC 328",
+    "questions": [
+      {
+        "id": 1,
+        "text": "Which data structure uses LIFO (Last In, First Out) ordering?",
+        "options": [
+          { "id": 1, "label": "A", "text": "Queue", "isCorrect": false },
+          { "id": 2, "label": "B", "text": "Stack", "isCorrect": true },
+          { "id": 3, "label": "C", "text": "Linked List", "isCorrect": false },
+          { "id": 4, "label": "D", "text": "Binary Tree", "isCorrect": false }
+        ],
+        "correctAnswer": "Stack"
+      },
+      {
+        "id": 2,
+        "text": "What does SQL stand for?",
+        "options": [
+          { "id": 1, "label": "A", "text": "Structured Query Language", "isCorrect": true },
+          { "id": 2, "label": "B", "text": "Simple Query Language", "isCorrect": false },
+          { "id": 3, "label": "C", "text": "Sequential Query Language", "isCorrect": false },
+          { "id": 4, "label": "D", "text": "Standard Query Language", "isCorrect": false }
+        ],
+        "correctAnswer": "Structured Query Language"
+      },
+      {
+        "id": 3,
+        "text": "What is a primary key in a database?",
+        "options": [
+          {
+            "id": 1,
+            "label": "A",
+            "text": "A key that is used to uniquely identify a record in a table",
+            "isCorrect": true
+          },
+          {
+            "id": 2,
+            "label": "B",
+            "text": "A key that is used to reference a record in another table",
+            "isCorrect": false
+          },
+          {
+            "id": 3,
+            "label": "C",
+            "text": "A key that is used to index the database",
+            "isCorrect": false
+          },
+          {
+            "id": 4,
+            "label": "D",
+            "text": "A key that is used to encrypt data in the database",
+            "isCorrect": false
+          }
+        ],
+        "correctAnswer": "A key that is used to uniquely identify a record in a table"
+      }
+    ]
+  },
+  {
+    "id": 6,
+    "name": "CSC 306",
+    "questions": [
+      {
+        "id": 1,
+        "text": "What is the purpose of a database index?",
+        "options": [
+          { "id": 1, "label": "A", "text": "To ensure data integrity", "isCorrect": false },
+          { "id": 2, "label": "B", "text": "To optimize query performance", "isCorrect": true },
+          { "id": 3, "label": "C", "text": "To store large amounts of data", "isCorrect": false },
+          { "id": 4, "label": "D", "text": "To maintain database transactions", "isCorrect": false }
+        ],
+        "correctAnswer": "To optimize query performance"
+      },
+      {
+        "id": 2,
+        "text": "Which of the following is a NoSQL database?",
+        "options": [
+          { "id": 1, "label": "A", "text": "MySQL", "isCorrect": false },
+          { "id": 2, "label": "B", "text": "MongoDB", "isCorrect": true },
+          { "id": 3, "label": "C", "text": "PostgreSQL", "isCorrect": false },
+          { "id": 4, "label": "D", "text": "SQLite", "isCorrect": false }
+        ],
+        "correctAnswer": "MongoDB"
+      },
+      {
+        "id": 3,
+        "text": "What is the CAP theorem in distributed databases?",
+        "options": [
+          {
+            "id": 1,
+            "label": "A",
+            "text": "Consistency, Availability, Partition tolerance",
+            "isCorrect": true
+          },
+          {
+            "id": 2,
+            "label": "B",
+            "text": "Concurrency, Atomicity, Persistence",
+            "isCorrect": false
+          },
+          {
+            "id": 3,
+            "label": "C",
+            "text": "Consistency, Atomicity, Persistence",
+            "isCorrect": false
+          },
+          {
+            "id": 4,
+            "label": "D",
+            "text": "Concurrency, Availability, Partition tolerance",
+            "isCorrect": false
+          }
+        ],
+        "correctAnswer": "Consistency, Availability, Partition tolerance"
+      }
+    ]
+  },
+  {
+    "id": 7,
+    "name": "CSC 201",
+    "questions": [
+      {
+        "id": 1,
+        "text": "What is the difference between a variable and a constant?",
+        "options": [
+          {
+            "id": 1,
+            "label": "A",
+            "text": "Variables can be changed, constants cannot",
+            "isCorrect": true
+          },
+          {
+            "id": 2,
+            "label": "B",
+            "text": "Constants can be changed, variables cannot",
+            "isCorrect": false
+          },
+          {
+            "id": 3,
+            "label": "C",
+            "text": "Variables store numbers, constants store text",
+            "isCorrect": false
+          },
+          { "id": 4, "label": "D", "text": "There is no difference", "isCorrect": false }
+        ],
+        "correctAnswer": "Variables can be changed, constants cannot"
+      },
+      {
+        "id": 2,
+        "text": "Which programming construct is used to repeat a block of code?",
+        "options": [
+          { "id": 1, "label": "A", "text": "Conditional statement", "isCorrect": false },
+          { "id": 2, "label": "B", "text": "Loop", "isCorrect": true },
+          { "id": 3, "label": "C", "text": "Function", "isCorrect": false },
+          { "id": 4, "label": "D", "text": "Variable declaration", "isCorrect": false }
+        ],
+        "correctAnswer": "Loop"
+      },
+      {
+        "id": 3,
+        "text": "What is the purpose of a comment in code?",
+        "options": [
+          { "id": 1, "label": "A", "text": "To make the code run faster", "isCorrect": false },
+          {
+            "id": 2,
+            "label": "B",
+            "text": "To explain the code to other programmers or yourself",
+            "isCorrect": true
+          },
+          { "id": 3, "label": "C", "text": "To store data", "isCorrect": false },
+          { "id": 4, "label": "D", "text": "To change the program's output", "isCorrect": false }
+        ],
+        "correctAnswer": "To explain the code to other programmers or yourself"
+      },
+      {
+        "id": 4,
+        "text": "Which of the following is NOT a primitive data type?",
+        "options": [
+          { "id": 1, "label": "A", "text": "Integer", "isCorrect": false },
+          { "id": 2, "label": "B", "text": "String", "isCorrect": false },
+          { "id": 3, "label": "C", "text": "Array", "isCorrect": true },
+          { "id": 4, "label": "D", "text": "Boolean", "isCorrect": false }
+        ],
+        "correctAnswer": "Array"
+      },
+      {
+        "id": 5,
+        "text": "What is the result of the expression 5 + 3 * 2?",
+        "options": [
+          { "id": 1, "label": "A", "text": "16", "isCorrect": false },
+          { "id": 2, "label": "B", "text": "11", "isCorrect": true },
+          { "id": 3, "label": "C", "text": "10", "isCorrect": false },
+          { "id": 4, "label": "D", "text": "8", "isCorrect": false }
+        ],
+        "correctAnswer": "11"
+      },
+      {
+        "id": 6,
+        "text": "What is the output of the following code snippet?\n`\nx = 10\nif x > 5:\n  print(\"x is greater than 5\")\nelse:\n  print(\"x is less than or equal to 5\")`",
+        "options": [
+          { "id": 1, "label": "A", "text": "x is less than or equal to 5", "isCorrect": false },
+          { "id": 2, "label": "B", "text": "x is greater than 5", "isCorrect": true },
+          { "id": 3, "label": "C", "text": "10", "isCorrect": false },
+          { "id": 4, "label": "D", "text": "An error message", "isCorrect": false }
+        ],
+        "correctAnswer": "x is greater than 5"
+      },
+      {
+        "id": 7,
+        "text": "What is the purpose of a function in programming?",
+        "options": [
+          { "id": 1, "label": "A", "text": "To make the code run faster", "isCorrect": false },
+          {
+            "id": 2,
+            "label": "B",
+            "text": "To break down a program into smaller, reusable parts",
+            "isCorrect": true
+          },
+          { "id": 3, "label": "C", "text": "To store data", "isCorrect": false },
+          { "id": 4, "label": "D", "text": "To define variables", "isCorrect": false }
+        ],
+        "correctAnswer": "To break down a program into smaller, reusable parts"
+      },
+      {
+        "id": 8,
+        "text": "Which of the following is NOT a valid variable name in Python?",
+        "options": [
+          { "id": 1, "label": "A", "text": "_my_variable", "isCorrect": false },
+          { "id": 2, "label": "B", "text": "myVariable", "isCorrect": false },
+          { "id": 3, "label": "C", "text": "123variable", "isCorrect": true },
+          { "id": 4, "label": "D", "text": "my_variable_123", "isCorrect": false }
+        ],
+        "correctAnswer": "123variable"
+      },
+      {
+        "id": 9,
+        "text": "What does the modulo operator (%) do in programming?",
+        "options": [
+          {
+            "id": 1,
+            "label": "A",
+            "text": "Divides two numbers and returns the quotient",
+            "isCorrect": false
+          },
+          {
+            "id": 2,
+            "label": "B",
+            "text": "Divides two numbers and returns the remainder",
+            "isCorrect": true
+          },
+          { "id": 3, "label": "C", "text": "Multiplies two numbers", "isCorrect": false },
+          { "id": 4, "label": "D", "text": "Raises a number to a power", "isCorrect": false }
+        ],
+        "correctAnswer": "Divides two numbers and returns the remainder"
+      },
+      {
+        "id": 10,
+        "text": "What is the difference between a for loop and a while loop?",
+        "options": [
+          {
+            "id": 1,
+            "label": "A",
+            "text": "A for loop is used for definite iteration, a while loop is used for indefinite iteration",
+            "isCorrect": true
+          },
+          {
+            "id": 2,
+            "label": "B",
+            "text": "A while loop is used for definite iteration, a for loop is used for indefinite iteration",
+            "isCorrect": false
+          },
+          { "id": 3, "label": "C", "text": "There is no difference", "isCorrect": false },
+          {
+            "id": 4,
+            "label": "D",
+            "text": "A for loop is faster than a while loop",
+            "isCorrect": false
+          }
+        ],
+        "correctAnswer": "A for loop is used for definite iteration, a while loop is used for indefinite iteration"
+      }
+    ]
   }
 ]
