@@ -121,14 +121,14 @@
             :disabled="faceCaptured"
             :class="{
               'opacity-40 cursor-not-allowed': faceCaptured,
-              'animate-pulse opacity-100 cursor-not-allowed': capturing
+              'animate-pulse opacity-100 cursor-not-allowed': capturing.state
             }"
             class="w-full py-2 px-4 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
           >
             {{
               faceCaptured
                 ? 'Face Captured Successfully'
-                : capturing
+                : capturing.state
                   ? 'Capturing...'
                   : 'Capture Face'
             }}
@@ -143,7 +143,7 @@
               }
             "
             :class="{
-              'opacity-40 cursor-not-allowed': !faceCaptured,
+              'opacity-40 cursor-not-allowed': !faceCaptured
             }"
             type="submit"
             class="flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 w-full"
@@ -160,14 +160,20 @@
         >
       </div>
     </div>
+    <FacialRecognitionModal
+      :show="showFaceRecognitionModal"
+      @faceCaptured="onFaceCaptured"
+      @close="showFaceRecognitionModal = false"
+    />
   </div>
 </template>
 
 <script setup>
-import { reactive, ref, onBeforeUnmount, watch, computed } from 'vue'
+import { reactive, ref, computed } from 'vue'
+import FacialRecognitionModal from '@/components/FacialRecoginitionModal.vue'
 import axios from 'axios'
-import * as faceapi from 'face-api.js'
 import router from '../router'
+import { capturing } from '@/global_state/state';
 
 const base = axios.create({
   baseURL: 'http://localhost:8900/api/v1'
@@ -186,18 +192,9 @@ const confirmPassword = reactive({ confirmPwd: '' })
 const passwordVisible = ref(false)
 const confirmPasswordVisible = ref(false)
 const passwordsMatch = computed(() => signup.password === confirmPassword.confirmPwd)
-const inputFocused = ref(false)
 
-// camera capture variables
-const showCamera = ref(false)
-const distanceClass = ref('')
-const showFaceGuide = ref(true) // Show the face guide initially
-const video = ref(null)
-const faceCaptureSection = ref(null)
+const showFaceRecognitionModal = ref(false)
 const faceCaptured = ref(false)
-const capturing = ref(false)
-let faceCaptureInterval = null
-let faceCaptureTimeout
 
 // message variables
 const errorMessage = ref(null)
@@ -210,112 +207,15 @@ const toggleConfirmPasswordVisibility = () => {
   confirmPasswordVisible.value = !confirmPasswordVisible.value
 }
 
-const loadModels = async () => {
-  await faceapi.nets.ssdMobilenetv1.loadFromUri('http://localhost:8900/models')
-  await faceapi.nets.faceLandmark68Net.loadFromUri('http://localhost:8900/models')
-  await faceapi.nets.faceRecognitionNet.loadFromUri('http://localhost:8900/models')
-}
-
 const initFaceCapture = () => {
-  capturing.value = true
-  showCamera.value = true
+  capturing.state = true
   errorMessage.value = null
+  showFaceRecognitionModal.value = true
 }
 
-const captureFace = async () => {
-  faceCaptureInterval = setInterval(async () => {
-    const detection = await faceapi
-      .detectSingleFace(video.value)
-      .withFaceLandmarks()
-      .withFaceDescriptor()
-
-    if (detection) {
-      showCamera.value = false
-      clearInterval(faceCaptureInterval)
-      signup.faceDescriptor = detection.descriptor
-      errorMessage.value = null
-      faceCaptured.value = true
-      stopVideo()
-    } else {
-      faceCaptured.value = false
-    }
-  }, 750)
-}
-
-// Close the camera when navigating away from the page
-onBeforeUnmount(() => {
-  if (video.value && video.value.srcObject) {
-    const stream = video.value.srcObject
-    const tracks = stream.getTracks()
-    tracks.forEach((track) => track.stop())
-  }
-})
-
-const stopVideo = () => {
-  if (video.value && video.value.srcObject) {
-    const stream = video.value.srcObject
-    const tracks = stream.getTracks()
-    tracks.forEach((track) => track.stop())
-    video.value.srcObject = null
-  }
-}
-
-// create and export in a seperate file
-const startVideo = () => {
-  const constraints = (window.constraints = { audio: false, video: true })
-  navigator.mediaDevices
-    .getUserMedia(constraints)
-    .then((stream) => {
-      if (video.value) {
-        video.value.srcObject = stream
-      }
-    })
-    .catch((error) => {
-      console.error('Error accessing camera:', error)
-    })
-}
-
-watch(showCamera, async (newShowCamera) => {
-  const checkFaceTimeout = () => {
-    if (faceCaptured.value) {
-      clearTimeout(faceCaptureTimeout)
-      showCamera.value = false
-      capturing.value = false
-      return true
-    }
-    return false
-  }
-
-  if (newShowCamera) {
-    if (!loadModels()) {
-      await loadModels()
-    }
-    startVideo()
-    setTimeout(() => scrollToFaceCaptureSection(), 50)
-    captureFace()
-
-    faceCaptureTimeout = setTimeout(() => {
-      if (!checkFaceTimeout()) {
-        clearInterval(faceCaptureInterval)
-        showCamera.value = false
-        capturing.value = false
-        errorMessage.value = 'Failed to capture face... try again'
-        stopVideo()
-      }
-    }, 15000)
-  } else if (checkFaceTimeout()) {
-    clearInterval(faceCaptureInterval)
-  }
-})
-
-const scrollToFaceCaptureSection = () => {
-  console.log(faceCaptureSection.value)
-  // Use nextTick to ensure DOM update before scrolling
-  if (faceCaptureSection.value) {
-    faceCaptureSection.value.scrollIntoView({ behavior: 'smooth' })
-  } else {
-    console.warn('Face capture section not found.')
-  }
+const onFaceCaptured = () =>{
+  faceCaptured.value = true
+  capturing.state = false
 }
 
 const signupUser = () => {
