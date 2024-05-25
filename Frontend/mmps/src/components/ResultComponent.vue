@@ -1,8 +1,8 @@
 <template>
   <!-- Result Component -->
   <div class="results w-full bg-white rounded shadow-md p-8 h-full">
-    <div class="flex">
-      <div class="w-1/2">
+    <div class="flex h-[60%] w-full justify-center">
+      <div>
         <h1 class="text-2xl font-semibold text-gray-800 mt-4">Quiz Results</h1>
         <p class="text-lg text-gray-600 mb-4">Your Score:</p>
         <h2 class="text-4xl font-bold mb-6" :class="scoreColorClass">
@@ -13,9 +13,9 @@
           {{ feedbackMessage }}
         </div>
       </div>
-      <div class="w-1/2">
+      <!-- <div class="w-1/2 overflow-y-auto h-[60dvh]">
         <table class="table-auto w-full mt-4" v-if="quizQuestions.length > 0">
-          <thead>
+          <thead class="sticky top-0 bg-slate-200">
             <tr>
               <th class="px-4 py-2 text-gray-600">Question</th>
               <th class="px-4 py-2 text-gray-600">Your Answer</th>
@@ -32,9 +32,9 @@
             </tr>
           </tbody>
         </table>
-      </div>
+      </div> -->
     </div>
-    <div class="my-8 flex justify-center">
+    <div class="my-8 flex justify-center mr-4">
       <RouterLink
         @click="revertTimerState()"
         to="/quizes"
