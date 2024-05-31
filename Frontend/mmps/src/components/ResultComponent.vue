@@ -13,26 +13,7 @@
           {{ feedbackMessage }}
         </div>
       </div>
-      <!-- <div class="w-1/2 overflow-y-auto h-[60dvh]">
-        <table class="table-auto w-full mt-4" v-if="quizQuestions.length > 0">
-          <thead class="sticky top-0 bg-slate-200">
-            <tr>
-              <th class="px-4 py-2 text-gray-600">Question</th>
-              <th class="px-4 py-2 text-gray-600">Your Answer</th>
-              <th class="px-4 py-2 text-gray-600">Correct Answer</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(question, index) in quizQuestions" :key="index">
-              <td class="border px-4 py-2 text-gray-600">{{ question.text }}</td>
-              <td class="border px-4 py-2 text-gray-600">{{ yourAnswers[index] }}</td>
-              <td class="border px-4 py-2 text-green-500">
-                {{ yourAnswers[index] !== question.correctAnswer ? question.correctAnswer : ' ' }}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div> -->
+
     </div>
     <div class="my-8 flex justify-center mr-4">
       <RouterLink
