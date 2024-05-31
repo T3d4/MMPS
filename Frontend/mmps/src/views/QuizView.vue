@@ -41,10 +41,10 @@
 <script setup>
 import { ref, computed, reactive, watchEffect, onBeforeUnmount } from 'vue'
 import Question from '@/components/QuestionComponent.vue'
-import QuizHeader from '@/components/QuizHeaderComponent.vue'
+import QuizHeader from '@/components/QuizHeader.vue'
 import Result from '@/components/ResultComponent.vue'
-import QuestionSidebar from '@/components/QuestionSidebarComponent.vue'
-import ConfirmationModal from '@/components/ConfirmationModalComponent.vue'
+import QuestionSidebar from '@/components/QuestionSidebar.vue'
+import ConfirmationModal from '@/components/ConfirmationModal.vue'
 import { useRoute } from 'vue-router'
 import quizes from '@/data/quizes.json'
 import { timeLeft, timeTaken } from '@/global_state/state'
