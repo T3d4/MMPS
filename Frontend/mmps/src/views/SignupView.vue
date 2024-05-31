@@ -1,31 +1,15 @@
 <template>
-  <div
-    class="h-screen flex items-center justify-center bg-slate-800 overflow-y-auto transition-all"
-  >
-    <div
-      class="bg-white bg-opacity-90 p-8 rounded shadow-md max-w-md w-full my-4 max-h-[90dvh] overflow-y-auto"
-    >
+  <div class="h-screen flex items-center justify-center bg-slate-800 overflow-y-auto transition-all">
+    <div class="bg-white bg-opacity-90 p-8 rounded shadow-md max-w-md w-full my-4 max-h-[90dvh] overflow-y-auto">
       <h2 class="text-2xl font-bold text-gray-900 mb-4 text-center sm:text-xl">Create Account</h2>
       <form @submit.prevent="signupUser" class="space-y-4">
         <TextInput id="name" v-model="signup.name" label="Name" type="text" />
         <TextInput id="email" v-model="signup.email" label="Email" type="email" />
-        <PasswordInput
-          id="password"
-          v-model="signup.password"
-          label="Password"
-          :passwordMatch="passwordsMatch"
-        />
-        <PasswordInput
-          id="confirmPassword"
-          v-model="confirmPassword.confirmPwd"
-          label="Confirm Password"
-          :passwordMatch="passwordsMatch"
-        />
-
+        <PasswordInput id="password" v-model="signup.password" label="Password" :passwordMatch="passwordsMatch" />
+        <PasswordInput id="confirmPassword" v-model="confirmPassword.confirmPwd" label="Confirm Password" :passwordMatch="passwordsMatch" />
         <div class="!mt-2">
           <p v-if="errorMessage" class="text-sm text-red-500 !m-0 !ml-2">{{ errorMessage }}</p>
         </div>
-
         <div class="">
           <button
             @click="initFaceCapture"
@@ -46,7 +30,6 @@
             }}
           </button>
         </div>
-
         <div class="w-full">
           <button
             :disabled="!faceCaptured"
@@ -60,7 +43,6 @@
           </button>
         </div>
       </form>
-
       <div class="text-center mt-4 sm:mt-2">
         <span class="text-sm text-gray-600">Already have an account? </span>
         <router-link to="/login" class="font-medium text-indigo-600 hover:text-indigo-500">
@@ -70,8 +52,9 @@
     </div>
     <FacialRecognitionModal
       :show="showModal"
-      @faceCaptured="handleFaceCaptured"
+      @verified="handleFaceCaptured"
       @close="closeModal"
+      @notCaptured="handleNotCaptured"
     />
   </div>
 </template>
@@ -82,6 +65,7 @@ import { useRouter } from 'vue-router'
 import TextInput from '@/components/TextInput.vue'
 import PasswordInput from '@/components/PasswordInput.vue'
 import FacialRecognitionModal from '@/components/FacialRecoginitionModal.vue'
+import { capturing, showCamera } from '@/global_state/state'
 
 const router = useRouter()
 
@@ -98,21 +82,29 @@ const confirmPassword = ref({
 const errorMessage = ref('')
 const faceCaptured = ref(false)
 const showModal = ref(false)
-const capturing = ref({ state: false })
 
 const passwordsMatch = computed(() => signup.value.password === confirmPassword.value.confirmPwd)
 
 const initFaceCapture = () => {
   showModal.value = true
+  capturing.state = true
+  showCamera.state = true
 }
 
 const handleFaceCaptured = () => {
   faceCaptured.value = true
   showModal.value = false
+  capturing.state = false
+}
+
+const handleNotCaptured = () => {
+  faceCaptured.value = false
+  errorMessage.value = 'Face capture failed. Please try again.'
 }
 
 const closeModal = () => {
   showModal.value = false
+  capturing.state = false
 }
 
 const signupUser = () => {
