@@ -20,7 +20,9 @@
 
 <script setup>
 import { verified } from '@/global_state/state'
-import router from '@/router'
+import { useRouter } from 'vue-router';
+
+const router = useRouter()
 
 const props = defineProps({
   quiz: Object
