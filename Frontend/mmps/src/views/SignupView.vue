@@ -111,11 +111,14 @@ const handleFaceCaptured = (descriptor) => {
   faceCaptured.value = true
   showModal.value = false
   capturing.state = false
+  errorMessage.value = null
 }
 
 const handleNotCaptured = () => {
+  showModal.value = false
   faceCaptured.value = false
   errorMessage.value = 'Face capture failed. Please try again.'
+  capturing.state = false
 }
 
 const closeModal = () => {
@@ -138,7 +141,7 @@ const signupUser = async () => {
   try {
     const response = await axios.post('/api/v1/auth/signup', signup.value)
     if (response.data.success) {
-      router.push('/welcome')
+      router.push('/quizes')
     } else {
       errorMessage.value = response.data.message
     }
