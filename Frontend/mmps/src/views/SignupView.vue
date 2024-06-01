@@ -1,12 +1,26 @@
 <template>
-  <div class="h-screen flex items-center justify-center bg-slate-800 overflow-y-auto transition-all">
-    <div class="bg-white bg-opacity-90 p-8 rounded shadow-md max-w-md w-full my-4 max-h-[90dvh] overflow-y-auto">
+  <div
+    class="h-screen flex items-center justify-center bg-slate-800 overflow-y-auto transition-all"
+  >
+    <div
+      class="bg-white bg-opacity-90 p-8 rounded shadow-md max-w-md w-full my-4 max-h-[90dvh] overflow-y-auto"
+    >
       <h2 class="text-2xl font-bold text-gray-900 mb-4 text-center sm:text-xl">Create Account</h2>
       <form @submit.prevent="signupUser" class="space-y-4">
         <TextInput id="name" v-model="signup.name" label="Name" type="text" />
         <TextInput id="email" v-model="signup.email" label="Email" type="email" />
-        <PasswordInput id="password" v-model="signup.password" label="Password" :passwordMatch="passwordsMatch" />
-        <PasswordInput id="confirmPassword" v-model="confirmPassword.confirmPwd" label="Confirm Password" :passwordMatch="passwordsMatch" />
+        <PasswordInput
+          id="password"
+          v-model="signup.password"
+          label="Password"
+          :passwordMatch="passwordsMatch"
+        />
+        <PasswordInput
+          id="confirmPassword"
+          v-model="confirmPassword.confirmPwd"
+          label="Confirm Password"
+          :passwordMatch="passwordsMatch"
+        />
         <div class="!mt-2">
           <p v-if="errorMessage" class="text-sm text-red-500 !m-0 !ml-2">{{ errorMessage }}</p>
         </div>
@@ -52,7 +66,8 @@
     </div>
     <FacialRecognitionModal
       :show="showModal"
-      @verified="handleFaceCaptured"
+      mode="signup"
+      @faceDescriptor="handleFaceCaptured"
       @close="closeModal"
       @notCaptured="handleNotCaptured"
     />
@@ -61,18 +76,18 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import { useRouter } from 'vue-router'
+import router from '@/router'
 import TextInput from '@/components/TextInput.vue'
 import PasswordInput from '@/components/PasswordInput.vue'
 import FacialRecognitionModal from '@/components/FacialRecoginitionModal.vue'
 import { capturing, showCamera } from '@/global_state/state'
-
-const router = useRouter()
+import axios from 'axios'
 
 const signup = ref({
   name: '',
   email: '',
-  password: ''
+  password: '',
+  faceDescriptor: null
 })
 
 const confirmPassword = ref({
@@ -91,7 +106,8 @@ const initFaceCapture = () => {
   showCamera.state = true
 }
 
-const handleFaceCaptured = () => {
+const handleFaceCaptured = (descriptor) => {
+  signup.value.faceDescriptor = descriptor
   faceCaptured.value = true
   showModal.value = false
   capturing.state = false
@@ -105,9 +121,10 @@ const handleNotCaptured = () => {
 const closeModal = () => {
   showModal.value = false
   capturing.state = false
+  showCamera.state = false
 }
 
-const signupUser = () => {
+const signupUser = async () => {
   if (!passwordsMatch.value) {
     errorMessage.value = 'Passwords do not match.'
     return
@@ -118,8 +135,16 @@ const signupUser = () => {
     return
   }
 
-  // Perform signup logic here (e.g., API call)
-
-  router.push('/welcome')
+  try {
+    const response = await axios.post('/api/v1/auth/signup', signup.value)
+    if (response.data.success) {
+      router.push('/welcome')
+    } else {
+      errorMessage.value = response.data.message
+    }
+  } catch (error) {
+    console.error('Signup error:', error)
+    errorMessage.value = 'An error occurred during signup. Please try again.'
+  }
 }
 </script>
