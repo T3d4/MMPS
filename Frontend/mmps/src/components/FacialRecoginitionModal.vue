@@ -4,7 +4,9 @@
     class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
   >
     <div class="bg-white w-1/3 rounded-lg p-8 shadow-md">
-      <h2 class="text-2xl font-semibold mb-4 text-gray-700">Facial Recognition</h2>
+      <h2 class="text-2xl font-semibold mb-4 text-gray-700">
+        {{ mode === 'signup' ? 'Facial Capture' : 'Facial Recognition' }}
+      </h2>
 
       <video
         ref="video"
@@ -13,6 +15,12 @@
         playsinline
         muted
       ></video>
+
+      <div v-if="faceAuthLoading" class="flex justify-center mt-4">
+        <span class="loader"></span>
+        <!-- This can be a spinner or any loading indicator -->
+        <p class="text-gray-900 ml-2">Verifying...</p>
+      </div>
 
       <p v-if="!faceDetected && !faceAuthLoading" class="text-red-500 mt-2 pl-6">
         {{ errorMessage }}
@@ -25,35 +33,31 @@
         >
           Cancel
         </button>
-        <button
-          @click="capture"
-          :disabled="!faceDetected || faceVerified || faceAuthLoading"
-          :class="{
-            'animate-pulse opacity-100 cursor-not-allowed': faceAuthLoading,
-            'opacity-40 cursor-not-allowed': !faceDetected || faceVerified,
-            'bg-indigo-600 hover:bg-indigo-700 text-white': !faceAuthLoading
-          }"
-          class="px-4 py-2 rounded bg-indigo-600 hover:bg-indigo-700 text-white"
-        >
-          {{ faceAuthLoading ? 'Verifying...' : 'Verify' }}
-        </button>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
-import { capturing, showCamera } from '@/global_state/state'
+import { ref, watch, onBeforeUnmount } from 'vue'
+import { showCamera } from '@/global_state/state'
 import * as faceapi from 'face-api.js'
 import axios from 'axios'
 
 const props = defineProps({
   show: Boolean,
-  quizId: String
+  mode: {
+    type: String,
+    required: true,
+    validator: (value) => ['signup', 'quiz'].includes(value)
+  },
+  quizId: {
+    type: String,
+    required: false
+  }
 })
 
-const emit = defineEmits(['close', 'verified', 'notCaptured'])
+const emit = defineEmits(['close', 'verified', 'notCaptured', 'faceDescriptor'])
 
 const faceDetected = ref(false)
 const faceVerified = ref(false)
@@ -90,9 +94,17 @@ const stopVideo = () => {
 }
 
 const captureAndVerifyFace = async () => {
+  faceCaptureTimeout = setTimeout(() => {
+    if (!faceCaptured.value) {
+      clearInterval(faceCaptureInterval)
+      showCamera.state = false
+      stopVideo()
+      emit('notCaptured')
+    }
+  }, 10000)
+
   faceCaptureInterval = setInterval(async () => {
     try {
-      faceAuthLoading.value = true
       const detection = await faceapi
         .detectSingleFace(video.value)
         .withFaceLandmarks()
@@ -100,79 +112,94 @@ const captureAndVerifyFace = async () => {
 
       if (detection) {
         const faceDescriptor = Array.from(detection.descriptor)
-        const response = await axios.post('/api/v1/auth/validate-face', {
-          faceDescriptor,
-          email: localStorage.getItem('user_email')
-        })
+        clearTimeout(faceCaptureTimeout)
+        clearInterval(faceCaptureInterval)
+        faceAuthLoading.value = false
+        faceCaptured.value = true
 
-        if (response.data.success) {
-          faceVerified.value = true
+        if (props.mode === 'signup') {
+          // Emit face descriptor for signup
           faceCaptured.value = true
+          faceVerified.value = true
           showCamera.state = false
+          stopVideo()
+          emit('faceDescriptor', faceDescriptor)
           emit('verified')
-        } else {
-          errorMessage.value = 'Face not recognized. Please try again.'
+        } else if (props.mode === 'quiz') {
+          const response = await axios.post('/api/v1/auth/validate-face', {
+            faceDescriptor,
+            quizId: props.quizId,
+            email: localStorage.getItem('user_email')
+          })
+
+          if (response.data.success) {
+            faceCaptured.value = true
+            faceVerified.value = true
+            showCamera.state = false
+            stopVideo()
+            emit('verified')
+          }
         }
-      } else {
-        errorMessage.value = 'Face not detected. Please try again.'
       }
     } catch (error) {
       console.error(error)
       errorMessage.value = 'An error occurred during face verification.'
-    } finally {
-      faceAuthLoading.value = false
     }
-  }, 1000)
+  }, 750)
 }
 
 watch(showCamera, async (newShowCamera) => {
-  if (newShowCamera) {
+ 
+  if (newShowCamera.state) {
+    faceAuthLoading.value = true
     await loadModels()
     await startVideo()
     captureAndVerifyFace()
-
-    faceCaptureTimeout = setTimeout(() => {
-      if (!faceCaptured.value) {
-        clearInterval(faceCaptureInterval)
-        showCamera.state = false
-        errorMessage.value = 'Face capture timed out. Please try again.'
-        stopVideo()
-        emit('notCaptured')
-      }
-    }, 15000)
   } else {
     clearInterval(faceCaptureInterval)
     clearTimeout(faceCaptureTimeout)
     stopVideo()
+    faceAuthLoading.value = false
   }
 })
 
-onMounted(() => {
-  if (props.show) {
-    showCamera.state = true
-  }
-})
+// onMounted(() => {
+//   if (props.show) {
+//     showCamera.value = true
+//   }
+// })
 
 onBeforeUnmount(() => {
+  clearInterval(faceCaptureInterval)
+  clearTimeout(faceCaptureTimeout)
   stopVideo()
 })
 
 const closeModal = () => {
   showCamera.state = false
-  capturing.state = false
   clearInterval(faceCaptureInterval)
   clearTimeout(faceCaptureTimeout)
   stopVideo()
   emit('close')
 }
-
-// const capture = () => (showCamera.state = true)
-
-watch(
-  () => faceapi.detectSingleFace(video.value).withFaceLandmarks().withFaceDescriptor(),
-  (detections) => {
-    faceDetected.value = !!detections
-  },
-  { immediate: true }
-)
 </script>
+
+<style scoped>
+.loader {
+  border: 4px solid #f3f3f3; /* Light grey */
+  border-top: 4px solid #3498db; /* Blue */
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+</style>
