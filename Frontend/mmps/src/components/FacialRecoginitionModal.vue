@@ -3,22 +3,30 @@
     v-if="show"
     class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
   >
-    <div class="bg-white w-1/3 rounded-lg p-8 shadow-md">
-      <h2 class="text-2xl font-semibold mb-4 text-gray-700">
-        {{ mode === 'signup' ? 'Facial Capture' : 'Facial Recognition' }}
-      </h2>
+    <div class="bg-white w-[400px] rounded-lg p-8 shadow-md relative">
+      <h2 class="text-2xl font-semibold mb-4 text-gray-700">Facial Recognition</h2>
 
-      <video
-        ref="video"
-        class="w-2/3 mx-auto rounded-lg border-[3px] border-indigo-500 shadow-md"
-        autoplay
-        playsinline
-        muted
-      ></video>
+      <div
+        class="relative w-[300px] mx-auto rounded-md border-[3px] border-indigo-500 shadow-md h-[227px] flex items-center justify-center"
+      >
+        <video
+          ref="video"
+          v-show="!isVideoLoading"
+          class="w-full h-full"
+          autoplay
+          playsinline
+          muted
+        ></video>
+        <div
+          v-if="isVideoLoading"
+          class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75"
+        >
+          <div class="spinner"></div>
+        </div>
+      </div>
 
       <div v-if="faceAuthLoading" class="flex justify-center mt-4">
-        <span class="loader"></span>
-        <!-- This can be a spinner or any loading indicator -->
+        <div class="spinner"></div>
         <p class="text-gray-900 ml-2">Verifying...</p>
       </div>
 
@@ -29,7 +37,8 @@
       <div class="flex justify-center gap-4 mt-4">
         <button
           @click="closeModal"
-          class="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400 text-gray-700"
+          class="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400 text-gray-700 disabled:cursor-not-allowed disabled:opacity-60"
+          :disabled="isVideoLoading"
         >
           Cancel
         </button>
@@ -40,7 +49,7 @@
 
 <script setup>
 import { ref, watch, onBeforeUnmount } from 'vue'
-import { showCamera } from '@/global_state/state'
+import { showCamera, cancelLoading } from '@/global_state/state'
 import * as faceapi from 'face-api.js'
 import axios from 'axios'
 
@@ -65,6 +74,7 @@ const video = ref(null)
 const faceAuthLoading = ref(false)
 const errorMessage = ref(null)
 const faceCaptured = ref(false)
+const isVideoLoading = ref(true)
 let faceCaptureInterval = null
 let faceCaptureTimeout = null
 
@@ -75,14 +85,23 @@ const loadModels = async () => {
 }
 
 const startVideo = async () => {
+  if (cancelLoading.value) return // If cancel is clicked, stop further processing
   const constraints = { audio: false, video: true }
   try {
     const stream = await navigator.mediaDevices.getUserMedia(constraints)
     video.value.srcObject = stream
+    isVideoLoading.value = false // Video has started loading
   } catch (error) {
     console.error('Error accessing camera:', error)
+    isVideoLoading.value = false // Handle the error by marking loading as false
   }
 }
+
+watch(cancelLoading, (newCancelLoading) => {
+  if (!newCancelLoading.state) {
+    stopVideo()
+  }
+})
 
 const stopVideo = () => {
   if (video.value && video.value.srcObject) {
@@ -100,6 +119,7 @@ const captureAndVerifyFace = async () => {
       showCamera.state = false
       stopVideo()
       emit('notCaptured')
+      errorMessage.value = 'An error occurred during face verification.'
     }
   }, 10000)
 
@@ -145,29 +165,26 @@ const captureAndVerifyFace = async () => {
       console.error(error)
       errorMessage.value = 'An error occurred during face verification.'
     }
-  }, 750)
+  }, 950)
 }
 
 watch(showCamera, async (newShowCamera) => {
- 
   if (newShowCamera.state) {
     faceAuthLoading.value = true
+    isVideoLoading.value = true
     await loadModels()
     await startVideo()
-    captureAndVerifyFace()
+    if (!cancelLoading.value) {
+      captureAndVerifyFace()
+    }
   } else {
     clearInterval(faceCaptureInterval)
     clearTimeout(faceCaptureTimeout)
     stopVideo()
     faceAuthLoading.value = false
+    isVideoLoading.value = false
   }
 })
-
-// onMounted(() => {
-//   if (props.show) {
-//     showCamera.value = true
-//   }
-// })
 
 onBeforeUnmount(() => {
   clearInterval(faceCaptureInterval)
@@ -176,29 +193,27 @@ onBeforeUnmount(() => {
 })
 
 const closeModal = () => {
-  showCamera.state = false
+  cancelLoading.value = true
   clearInterval(faceCaptureInterval)
   clearTimeout(faceCaptureTimeout)
   stopVideo()
+  showCamera.state = false
   emit('close')
 }
 </script>
 
 <style scoped>
-.loader {
-  border: 4px solid #f3f3f3; /* Light grey */
-  border-top: 4px solid #3498db; /* Blue */
+.spinner {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
-  width: 24px;
-  height: 24px;
-  animation: spin 2s linear infinite;
+  border-top-color: #6366f1;
+  animation: spin 1s ease infinite;
 }
 
 @keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
+  to {
     transform: rotate(360deg);
   }
 }

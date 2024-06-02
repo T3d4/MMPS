@@ -80,7 +80,7 @@ import router from '@/router'
 import TextInput from '@/components/TextInput.vue'
 import PasswordInput from '@/components/PasswordInput.vue'
 import FacialRecognitionModal from '@/components/FacialRecoginitionModal.vue'
-import { capturing, showCamera } from '@/global_state/state'
+import { capturing, showCamera, cancelLoading } from '@/global_state/state'
 import axios from 'axios'
 
 const signup = ref({
@@ -104,6 +104,7 @@ const initFaceCapture = () => {
   showModal.value = true
   capturing.state = true
   showCamera.state = true
+  cancelLoading.value = false
 }
 
 const handleFaceCaptured = (descriptor) => {

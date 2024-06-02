@@ -19,11 +19,6 @@
 </template>
 
 <script setup>
-import { verified } from '@/global_state/state'
-import { useRouter } from 'vue-router';
-
-const router = useRouter()
-
 const props = defineProps({
   quiz: Object
 })
@@ -31,11 +26,7 @@ const props = defineProps({
 const emits = defineEmits(['quizSelected'])
 
 const handleClick = () => {
-  if (!verified.state) {
-    emits('quizSelected', props.quiz.id)
-  } else {
-    router.push(`/quiz/${props.quiz.id}`)
-  }
+  emits('quizSelected', props.quiz.id)
 }
 </script>
 

@@ -3,7 +3,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import QuizView from '@/views/QuizView.vue'
 import LoginView from '@/views/LoginView.vue'
 import SignupView from '@/views/SignupView.vue'
-import QuizesView from '@/views/QuizesView.vue'
+import QuizesView from '@/views/QuizzesView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
