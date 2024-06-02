@@ -33,10 +33,10 @@
 import { ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import router from '@/router'
-import Card from '@/components/CardComponent.vue'
+import Card from '@/components/QuizCard.vue'
 import quizData from '@/data/quizes.json'
 import FacialRecognitionModal from '@/components/FacialRecoginitionModal.vue'
-import { capturing, showCamera } from '@/global_state/state'
+import { capturing, showCamera, cancelLoading } from '@/global_state/state'
 
 const quizes = ref(quizData)
 const selectedCategory = ref('All') // New ref to track the selected category
@@ -54,9 +54,12 @@ const filteredQuizes = computed(() => {
   return filtered
 })
 
+
+// TODO
 const onSelectQuiz = () => {
   showModal.value = true
   showCamera.state = true
+  cancelLoading.value = false
 }
 
 const closeModal = () => {
