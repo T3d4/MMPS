@@ -1,9 +1,11 @@
 <template>
+    <!-- Quizzes View -->
   <div
-    class="bg-slate-800 flex flex-col justify-start items-center py-10 px-14 h-dvh overflow-y-auto"
+    class="bg-slate-800 flex flex-col justify-start items-center pb-10 h-dvh overflow-y-auto"
   >
+    <QuizzesHeader />
     <div class="flex flex-col items-center h-full">
-      <h1 class="text-3xl font-bold text-gray-300 mb-8">Select a Quiz</h1>
+      <h1 class="text-3xl font-bold text-gray-300 my-8">Select a Quiz</h1>
 
       <div class="flex-grow w-full mt-8">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
@@ -36,6 +38,7 @@ import router from '@/router'
 import Card from '@/components/QuizCard.vue'
 import quizData from '@/data/quizes.json'
 import FacialRecognitionModal from '@/components/FacialRecoginitionModal.vue'
+import QuizzesHeader from '@/components/QuizzesHeader.vue'
 import { capturing, showCamera, cancelLoading } from '@/global_state/state'
 
 const quizes = ref(quizData)
@@ -53,7 +56,6 @@ const filteredQuizes = computed(() => {
   }
   return filtered
 })
-
 
 // TODO
 const onSelectQuiz = () => {
