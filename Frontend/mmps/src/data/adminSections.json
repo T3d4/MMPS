@@ -1,0 +1,20 @@
+[
+  {
+    "id": "user-management",
+    "title": "User Management",
+    "description": "Manage users and their roles.",
+    "icon": "user-icon"
+  },
+  {
+    "id": "quiz-management",
+    "title": "Quiz Management",
+    "description": "Create, edit, and delete quizzes.",
+    "icon": "quiz-icon"
+  },
+  {
+    "id": "statistics",
+    "title": "Statistics",
+    "description": "View statistics and reports.",
+    "icon": "stats-icon"
+  }
+]

@@ -1,0 +1,12 @@
+[
+  {
+    "id": "stat1",
+    "title": "Total Users",
+    "value": 100
+  },
+  {
+    "id": "stat2",
+    "title": "Total Quizzes",
+    "value": 20
+  }
+]
