@@ -165,7 +165,7 @@ const captureAndVerifyFace = async () => {
       console.error(error)
       errorMessage.value = 'An error occurred during face verification.'
     }
-  }, 950)
+  }, 1000)
 }
 
 watch(showCamera, async (newShowCamera) => {
