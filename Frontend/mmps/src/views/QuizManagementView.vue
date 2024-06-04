@@ -14,7 +14,7 @@
       </div>
 
       <div class="flex-grow w-full mt-8">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-3">
           <QuizCard
             v-for="quiz in quizzes"
             :key="quiz.id"
