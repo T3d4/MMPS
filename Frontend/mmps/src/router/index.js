@@ -8,12 +8,13 @@ import AdminDashboard from '@/views/AdminDashboardView.vue'
 import UserManagement from '@/views/UserManagementView.vue'
 import QuizManagement from '@/views/QuizManagementView.vue'
 import Statistics from '@/views/StatisticsView.vue'
+import NotFound from '@/views/NotFound.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: '/quizes',
+      path: '/',
       name: 'quizes',
       component: QuizesView
     },
@@ -58,6 +59,11 @@ const router = createRouter({
       path: '/admin/statistics',
       name: 'Statistics',
       component: Statistics
+    },
+    {
+      path: '/:pathMatch(.*)*', // This is the wildcard route
+      name: 'NotFound',
+      component: NotFound
     }
     //   path: '/about',
     //   name: 'about',

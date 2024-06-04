@@ -81,7 +81,7 @@ const togglePasswordVisibility = () => {
 }
 
 const loginUser = () => {
-    router.push('/quizes')
+    router.push('/')
   // base
   //   .post('/login', login)
   //   .then((result) => {
