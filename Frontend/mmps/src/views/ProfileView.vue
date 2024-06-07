@@ -1,57 +1,54 @@
 <!-- src/views/ProfileView.vue -->
 <template>
-  <div class="max-w-3xl mx-auto p-8 bg-white shadow-md rounded-lg">
-    <h2 class="text-3xl font-bold mb-6">Profile</h2>
-    <div class="space-y-4">
-      <div>
-        <label class="block text-gray-700 font-semibold mb-2">First Name:</label>
-        <input
-          v-model="firstName"
-          type="text"
-          class="w-full p-2 border border-gray-300 rounded"
+  <div
+    class="bg-slate-800 flex flex-col justify-start items-center pb-10 h-dvh overflow-y-auto w-screen"
+  >
+    <div class="w-full" v-if="view.value == 'admin'"><AdminHeader /></div>
+    <div class="w-full" v-else><QuizzesHeader /></div>
+    <div class="flex flex-col items-center h-full w-full">
+      <h1 class="text-3xl font-bold text-gray-300 mb-8 mt-4">Account Settings</h1>
+      <div class="flex w-full mt-8 px-32 max-h-500px">
+        <!-- Left Menu -->
+        <ProfileMenu
+          :initialOption="currentView"
+          @optionSelected="handleOptionSelected"
+          class="min-w-[200px] w-[500px] lg:w-1/3 mr-4 h-fit rounded-l-lg"
         />
+        <!-- Right Form Section -->
+        <div
+          v-if="currentView === 'ForgotPassword'"
+          class="min-w-[400px] w-[600px] lg:w-1/2 p-10 bg-white shadow-md rounded-r-lg"
+        >
+          <ForgotPassword />
+        </div>
+        <div v-else class="min-w-[400px] w-[600px] lg:w-1/2 p-10 bg-white shadow-md rounded-r-lg">
+          <ProfileDetails />
+        </div>
       </div>
-      <div>
-        <label class="block text-gray-700 font-semibold mb-2">Last Name:</label>
-        <input
-          v-model="lastName"
-          type="text"
-          class="w-full p-2 border border-gray-300 rounded"
-        />
-      </div>
-      <div>
-        <label class="block text-gray-700 font-semibold mb-2">Email:</label>
-        <input
-          v-model="email"
-          type="email"
-          class="w-full p-2 border border-gray-300 rounded"
-        />
-      </div>
-      <button
-        @click="saveProfile"
-        class="mt-4 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700"
-      >
-        Save
-      </button>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
+import QuizzesHeader from '@/components/QuizzesHeader.vue'
+import ProfileMenu from '@/components/ProfileMenu.vue'
+import ProfileDetails from '@/components/ProfileDetails.vue'
+import ForgotPassword from '@/components/ForgotPassword.vue'
+import AdminHeader from '@/components/AdminHeader.vue'
+import { view } from '@/global_state/state'
 
-const firstName = ref(localStorage.getItem('firstName') || '')
-const lastName = ref(localStorage.getItem('lastName') || '')
-const email = ref(localStorage.getItem('email') || '')
+const currentView = ref('ProfileDetails')
 
-const saveProfile = () => {
-  localStorage.setItem('firstName', firstName.value)
-  localStorage.setItem('lastName', lastName.value)
-  localStorage.setItem('email', email.value)
-  alert('Profile saved successfully!')
+const handleOptionSelected = (option) => {
+  if (option === 'profile') {
+    currentView.value = 'ProfileDetails'
+  } else if (option === 'forgot-password') {
+    currentView.value = 'ForgotPassword'
+  }
 }
 </script>
 
 <style scoped>
-/* custom styles here if necessary */
+/* custom styles */
 </style>

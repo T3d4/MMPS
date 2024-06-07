@@ -43,9 +43,13 @@
             Statistics
           </router-link>
         </li>
-        <button @click="logout" class="text-red-600 hover:text-red-800 font-bold justify-center items-center flex">Logout</button>
+        <button
+          @click="logout"
+          class="text-red-600 hover:text-red-800 font-bold justify-center items-center flex"
+        >
+          Logout
+        </button>
       </ul>
-      
     </nav>
 
     <!-- Confirmation Modal -->
@@ -98,6 +102,12 @@ const cancelNavigation = () => {
 const proceedNavigation = () => {
   showModal.value = false
   router.push(targetPath.value)
+}
+
+const logout = () => {
+  // Clear user data from local storage or any other necessary cleanup
+  localStorage.clear()
+  router.push('/login')
 }
 </script>
 
