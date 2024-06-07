@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full bg-white shadow-md z-10 p-4 flex items-center justify-between">
+  <div class="w-full bg-white shadow-md z-10 p-2 flex items-center justify-between">
     <h4 class="text-xl font-semibold text-gray-800">Welcome, {{ userFirstName }}</h4>
     <div class="flex items-center space-x-4">
       <router-link 
@@ -12,7 +12,7 @@
         class="nav-link"
         :class="{ 'active-link': $route.path === '/profile' }"
       >Profile</router-link>
-      <button @click="logout" class="text-red-600 hover:text-red-800 font-bold">Logout</button>
+      <button @click="logout" class="text-red-600 hover:text-red-800 font-bold pr-4">Logout</button>
     </div>
   </div>
 </template>

@@ -8,47 +8,56 @@
             to="/admin"
             class="nav-link"
             :class="{ 'active-link': $route.path === '/admin' }"
-            @click.prevent="confirmNavigation('/admin')"
           >
             Home
           </router-link>
         </li>
         <li>
           <router-link
-            to="/admin/user-management"
+            to=""
             class="nav-link"
             :class="{ 'active-link': $route.path === '/admin/user-management' }"
-            @click.prevent="confirmNavigation('/admin/user-management')"
+            @click.capture="confirmNavigation('/admin/user-management', 'User Management')"
           >
             Users
           </router-link>
         </li>
         <li>
           <router-link
-            to="/admin/quiz-management"
+            to=""
             class="nav-link"
             :class="{ 'active-link': $route.path === '/admin/quiz-management' }"
-            @click.prevent="confirmNavigation('/admin/quiz-management')"
+            @click.capture="confirmNavigation('/admin/quiz-management', 'Quiz Management')"
           >
             Quizzes
           </router-link>
         </li>
         <li>
           <router-link
-            to="/admin/statistics"
+            to=""
             class="nav-link"
             :class="{ 'active-link': $route.path === '/admin/statistics' }"
-            @click.prevent="confirmNavigation('/admin/statistics')"
+            @click.capture="confirmNavigation('/admin/statistics', 'Statistics')"
           >
             Statistics
           </router-link>
         </li>
-        <button
-          @click="logout"
-          class="text-red-600 hover:text-red-800 font-bold justify-center items-center flex"
-        >
-          Logout
-        </button>
+        <li>
+          <router-link
+            to="/profile"
+            class="nav-link"
+            :class="{ 'active-link': $route.path === '/profile' }"
+            >Profile</router-link
+          >
+        </li>
+        <li class="flex items-center">
+          <button
+            @click="logout"
+            class="text-red-600 hover:text-red-800 font-bold justify-center items-center flex relative w-full pr-4"
+          >
+            Logout
+          </button>
+        </li>
       </ul>
     </nav>
 
@@ -58,8 +67,8 @@
       class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
     >
       <div class="bg-white p-6 rounded-lg shadow-lg">
-        <h2 class="text-xl font-bold mb-4">Confirm Navigation</h2>
-        <p class="mb-4">Are you sure you want to navigate to this section?</p>
+        <h2 class="text-2xl font-semibold mb-4 text-gray-700">Confirm Navigation</h2>
+        <p class="mb-6 text-gray-700">Are you sure you want to access {{ section }}?</p>
         <div class="flex justify-end space-x-4">
           <button
             @click="cancelNavigation"
@@ -82,14 +91,18 @@
 <script setup>
 import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import ProfileDetails from './ProfileDetails.vue'
 
 const $route = useRoute()
 const router = useRouter()
 
 const showModal = ref(false)
 const targetPath = ref('')
+const section = ref(null)
 
-const confirmNavigation = (path) => {
+const confirmNavigation = (path, sectionName) => {
+  console.log(path)
+  section.value = sectionName
   targetPath.value = path
   showModal.value = true
 }
