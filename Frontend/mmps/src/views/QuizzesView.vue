@@ -1,8 +1,6 @@
 <template>
-    <!-- Quizzes View -->
-  <div
-    class="bg-slate-800 flex flex-col justify-start items-center pb-10 h-dvh overflow-y-auto"
-  >
+  <!-- Quizzes View -->
+  <div class="bg-slate-800 flex flex-col justify-start items-center pb-10 h-dvh overflow-y-auto">
     <QuizzesHeader />
     <div class="flex flex-col items-center h-full">
       <h1 class="text-3xl font-bold text-gray-300 my-8">Select a Quiz</h1>
@@ -32,14 +30,14 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import router from '@/router'
 import Card from '@/components/QuizCard.vue'
 import quizData from '@/data/quizzes.json'
 import FacialRecognitionModal from '@/components/FacialRecoginitionModal.vue'
 import QuizzesHeader from '@/components/QuizzesHeader.vue'
-import { capturing, showCamera, cancelLoading } from '@/global_state/state'
+import { capturing, showCamera, cancelLoading, view } from '@/global_state/state'
 
 const quizes = ref(quizData)
 const selectedCategory = ref('All') // New ref to track the selected category
@@ -47,6 +45,10 @@ const showModal = ref(false)
 const route = useRoute()
 const quizId = route.params.quizId
 // const quizId = ref(null)
+
+onMounted(() => {
+  view.value = 'user'
+})
 
 // Computed property for filtering quizes based on category and search
 const filteredQuizes = computed(() => {
