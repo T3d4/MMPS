@@ -9,6 +9,7 @@ import QuizManagement from '@/views/QuizManagementView.vue'
 import Statistics from '@/views/StatisticsView.vue'
 import NotFound from '@/views/NotFound.vue'
 import ProfileView from '@/views/ProfileView.vue'
+import UserDetailView from '@/views/UserDetailView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -62,6 +63,11 @@ const router = createRouter({
       path: '/profile',
       name: 'profile',
       component: ProfileView
+    },
+    {
+      path: '/admin/user/:id',
+      name: 'UserDetail',
+      component: UserDetailView
     },
   ]
 })
