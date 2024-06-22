@@ -48,8 +48,10 @@ import ConfirmationModal from '@/components/ConfirmationModal.vue'
 import { useRoute } from 'vue-router'
 import quizes from '@/data/quizzes.json'
 import { timeLeft, timeTaken } from '@/global_state/state'
+import { useStore } from 'vuex'
 
 const route = useRoute()
+const store = useStore()
 const quizId = ref(parseInt(route.params.id))
 const quiz = quizes.find((q) => q.id === quizId.value)
 const showResults = ref(false)
@@ -59,6 +61,8 @@ const answeredQuestions = reactive([])
 const numberOfCorrectAnswers = ref(0)
 let timerInterval = null
 const showConfirmationModal = ref(false)
+
+
 
 const questionStatus = computed(() => `${currentQuestionIndex.value + 1}/${quiz.questions.length}`)
 const barPercentage = computed(() => `${(answeredQuestions.length / quiz.questions.length) * 100}%`)
@@ -77,8 +81,6 @@ const onOptionSelected = (isCorrect) => {
     answeredQuestions.push(currentQuestionIndex.value)
   }
 
-  // answeredQuestions.value = userAnswers.length
-
   if (quiz.questions.length - 1 === currentQuestionIndex.value) {
     currentQuestionIndex.value -= 1
   }
@@ -86,10 +88,30 @@ const onOptionSelected = (isCorrect) => {
   currentQuestionIndex.value++
 }
 
-const submitQuiz = () => {
+const submitQuiz = async () => {
   showResults.value = true
   clearInterval(timerInterval)
   showConfirmationModal.value = false
+
+  // Collect quiz result data
+  const quizResult = {
+    date: new Date().toISOString(),
+    quizName: quiz.name,
+    timeTaken: timeTaken.time,
+    totalQuestions: quiz.questions.length,
+    answeredQuestions: answeredQuestions.length,
+    correctAnswers: numberOfCorrectAnswers.value,
+    userId: store.getters.user._id
+  }
+
+  try {
+    const response = await this.$axios.post('/quiz/quiz-result', quizResult)
+    console.log(response)
+    // Optionally, store locally or in Vuex for immediate access
+    // store.commit('addQuizResult', quizResult)
+  } catch (error) {
+    console.error('Error submitting quiz result:', error)
+  }
 }
 
 const navigateToQuestion = (index) => {
@@ -108,7 +130,6 @@ const restartQuiz = () => {
 
 // This lovely baby is who you call on to monitor reactive states
 watchEffect(() => {
-  console.log(quizId.value)
   if (quizId.value > 0 && !showResults.value) {
     // Start the timer
     timerInterval = setInterval(() => {

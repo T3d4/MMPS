@@ -1,7 +1,5 @@
 <template>
-  <div
-    class="min-h-screen flex items-center justify-center bg-slate-800 overflow-y-auto"
-  >
+  <div class="min-h-screen flex items-center justify-center bg-slate-800 overflow-y-auto">
     <div class="bg-white bg-opacity-90 p-8 rounded shadow-md max-w-md w-full overflow-hidden">
       <h2 class="text-2xl font-bold text-gray-900 mb-4 text-center">Account Login</h2>
 
@@ -39,6 +37,10 @@
           </div>
         </div>
 
+        <p v-if="error != null" class="text-red-500 my-2 text-sm pl-6">
+          {{ error }}
+        </p>
+
         <div class="flex items-center justify-between">
           <div class="text-sm">
             <a href="#" class="font-medium text-indigo-600 hover:text-indigo-500"
@@ -66,35 +68,29 @@
 
 <script setup>
 import { reactive, ref } from 'vue'
-// import axios from 'axios'
 import router from '../router'
+import store from '@/store/store'
 
-// const base = axios.create({
-//   baseURL: 'https://medboard.onrender.com/api/v1' // replace on production env
-// })
-
-const login = reactive({})
+const login = reactive({ email: '', password: '' })
 const passwordVisible = ref(false)
+const error = ref(null)
 
 const togglePasswordVisibility = () => {
   passwordVisible.value = !passwordVisible.value
 }
 
-const loginUser = () => {
-    router.push('/')
-  // base
-  //   .post('/login', login)
-  //   .then((result) => {
-  //     // Handle successful signup (e.g., redirect to login page)
-  //     if (!result.accesstkn) {
-      
-  //     } else {
-  //       router.push('/')
-  //     }
-  //   })
-  //   .catch((err) => {
-  //     console.log(err)
-  //     // Handle signup errors
-  //   })
+const loginUser = async () => {
+  try {
+    error.value = null // Reset error message
+    await store.dispatch('login', { email: login.email, password: login.password })
+    if (store.getters.isAdmin) {
+      router.push('/admin')
+    } else {
+      router.push('/')
+    }
+  } catch (err) {
+    console.error('Login failed:', err)
+    error.value = 'Login failed. Please check your credentials and try again.'
+  }
 }
 </script>

@@ -1,3 +1,4 @@
+<!-- src/views/UserDetailView.vue -->
 <template>
   <div
     class="bg-slate-800 flex flex-col justify-start items-center pb-10 h-dvh overflow-y-auto w-screen"
@@ -8,26 +9,27 @@
 
       <div class="flex w-full mt-8 px-32 max-h-500px">
         <!-- Left Menu or Navigation -->
-        <div class="min-w-[200px] w-[500px] lg:w-1/3 mr-4 h-60 bg-gray-700 rounded-l-lg p-4">
+        <div class="min-w-[200px] w-[500px] lg:w-1/3 mr-4 h-60 bg-gray-800 rounded-l-lg p-4">
+          <h2 class="text-2xl text-white my-2 mx-2 font-bold mb-4">User Details</h2>
           <ul>
             <li
-              class="text-gray-300 text-lg hover:text-white px-4 py-2 rounded-full transition-all duration-200 cursor-pointer"
-              :class="{ 'bg-gray-600': currentTab === 'details' }"
               @click="currentTab = 'details'"
+              :class="{ 'active-link': currentTab === 'details' }"
+              class="w-full text-left p-2 rounded nav-link cursor-pointer"
             >
               User Details
             </li>
             <li
-              class="text-gray-300 text-lg hover:text-white px-4 py-2 rounded-full transition-all duration-200 cursor-pointer"
-              :class="{ 'bg-gray-600': currentTab === 'update' }"
               @click="currentTab = 'update'"
+              :class="{ 'active-link': currentTab === 'update' }"
+              class="w-full text-left p-2 rounded nav-link cursor-pointer"
             >
               Update User
             </li>
             <li
-              class="text-gray-300 text-lg hover:text-white px-4 py-2 rounded-full transition-all duration-200 cursor-pointer"
-              :class="{ 'bg-gray-600': currentTab === 'delete' }"
               @click="currentTab = 'delete'"
+              :class="{ 'active-link': currentTab === 'delete' }"
+              class="w-full text-left p-2 rounded nav-link cursor-pointer"
             >
               Delete User
             </li>
@@ -37,15 +39,18 @@
         <!-- Right Content Section -->
         <div class="min-w-[400px] w-[600px] lg:w-1/2 p-10 bg-white shadow-md rounded-r-lg">
           <div v-if="currentTab === 'details'">
-            <h2 class="text-2xl font-bold mb-4">{{ user.name }}</h2>
+            <h2 class="text-3xl font-bold mb-6 text-gray-800">{{ user.name }}</h2>
             <p class="text-gray-600">{{ user.role }}</p>
-            <h3 class="text-xl font-bold mb-2">Scores of Previous Quizzes</h3>
+            <h3 class="text-xl text-gray-600 font-bold mb-2">Scores of Previous Quizzes</h3>
             <ul class="mb-4">
               <li v-for="(quiz, index) in user.quizzes" :key="index" class="text-gray-600">
-                {{ quiz.name }}: {{ quiz.score }}
+                {{ quiz.name }}: {{ quiz.score }} -
+                <span class="text-gray-400">
+                  {{ formatDate(quiz.dateTaken) }}
+                </span>
               </li>
             </ul>
-            <h3 class="text-xl font-bold mb-2">Likes</h3>
+            <h3 class="text-3xl font-bold mb-6 text-gray-800">Likes</h3>
             <ul class="mb-4">
               <li v-for="(like, index) in user.likes" :key="index" class="text-gray-600">
                 {{ like }}
@@ -53,8 +58,8 @@
             </ul>
           </div>
 
-          <div v-else-if="currentTab === 'update'">
-            <h2 class="text-2xl font-bold mb-4">Update User</h2>
+          <div v-else-if="currentTab === 'update'" class="text-gray-600">
+            <h2 class="text-3xl font-bold mb-6 text-gray-800">Update User</h2>
             <form @submit.prevent="updateUser">
               <div class="mb-4">
                 <label class="block text-gray-700 font-semibold mb-2">Name:</label>
@@ -65,9 +70,9 @@
                 />
               </div>
               <div class="mb-4">
-                <label class="block text-gray-700 font-semibold mb-2">Role:</label>
+                <label class="block text-gray-700 font-semibold mb-2">Email:</label>
                 <input
-                  v-model="user.role"
+                  v-model="user.email"
                   type="text"
                   class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
@@ -82,7 +87,7 @@
           </div>
 
           <div v-else-if="currentTab === 'delete'">
-            <h2 class="text-2xl font-bold mb-4">Delete User</h2>
+            <h2 class="text-3xl font-bold mb-6 text-gray-800">Delete User</h2>
             <p class="text-gray-600 mb-4">Are you sure you want to delete this user?</p>
             <button
               @click="deleteUser"
@@ -98,38 +103,102 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import AdminHeader from '@/components/AdminHeader.vue'
 import { useRoute } from 'vue-router'
+import { view } from '@/global_state/state'
+import { axiosInstance } from '@/axiosConfig' // Adjust the path as needed
+
+onMounted(() => (view.value = 'admin'))
 
 const route = useRoute()
 const userId = ref(route.params.id)
-
 const currentTab = ref('details')
 
-// Dummy user data (replace with actual data fetching logic)
 const user = ref({
-  id: userId.value,
-  name: 'John Doe',
-  role: 'Admin',
-  quizzes: [
-    { name: 'Quiz 1', score: 80 },
-    { name: 'Quiz 2', score: 75 }
-  ],
-  likes: ['Programming', 'Reading']
+  id: '',
+  name: '',
+  email: '',
+  quizzes: []
 })
 
-const updateUser = () => {
-  // Implement logic to update user details
-  console.log('Update user:', user.value.id)
+// Fetch user data based on userId
+const fetchUserData = async (id) => {
+  try {
+    const response = await axiosInstance.get(`/users/${id}`)
+    const { _id, ...rest } = response.data
+    user.value = { id: _id, ...rest }
+    console.log(user.value.id)
+  } catch (error) {
+    console.error('Error fetching user data:', error)
+  }
 }
 
-const deleteUser = () => {
-  // Implement logic to delete user
-  console.log('Delete user:', user.value.id)
+onMounted(() => {
+  fetchUserData(userId.value)
+})
+
+const updateUser = async () => {
+  try {
+    console.log(user.value)
+    await axiosInstance.patch(`/users/${user.value.id}`, {
+      ...user.value,
+      id: undefined,
+      _id: undefined,
+      quizzes: undefined,
+      name: user.value.name,
+      email: user.value.email,
+      isAdmin: undefined
+    })
+    console.log('User updated successfully')
+  } catch (error) {
+    console.error('Error updating user:', error)
+  }
+}
+
+const deleteUser = async () => {
+  try {
+    await axiosInstance.delete(`/users/${user.value.id}`)
+    console.log('User deleted successfully')
+  } catch (error) {
+    console.error('Error deleting user:', error)
+  }
+}
+
+// Function to format date and time
+const formatDate = (dateString) => {
+  const options = {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  }
+  return new Date(dateString).toLocaleDateString(undefined, options)
 }
 </script>
 
 <style scoped>
-/* Custom styles specific to this component */
+.nav-link {
+  position: relative;
+  @apply text-gray-300 text-lg hover:text-white px-4 py-2 rounded-full transition-all duration-200;
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  width: 0px;
+  height: 4px;
+  background-color: white;
+  transition: width 0.3s ease-in-out;
+}
+
+.active-link::after {
+  width: 65%;
+  background-color: white;
+}
 </style>

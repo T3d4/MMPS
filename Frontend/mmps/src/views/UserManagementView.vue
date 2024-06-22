@@ -1,5 +1,7 @@
 <template>
-  <div class="bg-slate-800 flex flex-col justify-start items-center pb-10 h-dvh w-screen overflow-y-auto">
+  <div
+    class="bg-slate-800 flex flex-col justify-start items-center pb-10 h-dvh w-screen overflow-y-auto"
+  >
     <AdminHeader />
     <div class="flex flex-col items-center h-full w-full">
       <h1 class="text-3xl font-bold text-gray-300 mt-4 mb-8">User Management</h1>
@@ -22,26 +24,47 @@
         @close="closeModal"
       />
 
-      <p v-if="users.length === 0" class="text-gray-600 mt-4">
-        No users available.
-      </p>
+      <p v-if="users.length === 0" class="text-gray-600 mt-4">No users available.</p>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import AdminHeader from '@/components/AdminHeader.vue'
 import UserCard from '@/components/UserCard.vue'
 import UserModal from '@/components/UserModal.vue'
-import userData from '@/data/users.json'
-// import { modalState } from '@/global_state/state'
+import { axiosInstance } from '@/axiosConfig'
+import { useStore } from 'vuex'
 
-const users = ref(userData)
+// import { modalState } from '@/global_state/state'
+const store = useStore()
+const token = computed(() => store.getters.token)
+axiosInstance.interceptors.request.use(
+  (config) => {
+    if (token.value) {
+      config.headers.Authorization = `Bearer ${token.value}`
+    }
+    return config
+  },
+  (error) => Promise.reject(error)
+)
+
+const users = ref([])
 const showModal = ref(false)
 const selectedUser = ref(null)
-// const router = useRouter()
 
+const fetchUsers = async () => {
+  try {
+    const response = await axiosInstance.get('/users/all')
+    console.log(response)
+    users.value = response.data
+  } catch (error) {
+    console.error('Error fetching users:', error)
+  }
+}
+
+onMounted(fetchUsers)
 const onSelectUser = (user) => {
   selectedUser.value = user
   showModal.value = true

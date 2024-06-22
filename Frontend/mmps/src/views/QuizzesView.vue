@@ -7,12 +7,7 @@
 
       <div class="flex-grow w-full mt-8">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-          <Card
-            v-for="quiz in filteredQuizes"
-            :key="quiz.id"
-            :quiz="quiz"
-            @quizSelected="onSelectQuiz"
-          />
+          <Card v-for="quiz in quizData" :key="quiz.id" :quiz="quiz" @quizSelected="onSelectQuiz" />
         </div>
       </div>
       <FacialRecognitionModal
@@ -22,7 +17,7 @@
         @verified="handleFaceVerified"
         @close="closeModal"
       />
-      <p v-if="filteredQuizes.length === 0" class="text-gray-600 mt-4">
+      <p v-if="quizData.length === 0" class="text-gray-600 mt-4">
         No quizzes found in this category.
       </p>
     </div>
@@ -30,8 +25,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { ref, onMounted } from 'vue'
 import router from '@/router'
 import Card from '@/components/QuizCard.vue'
 import quizData from '@/data/quizzes.json'
@@ -39,11 +33,10 @@ import FacialRecognitionModal from '@/components/FacialRecoginitionModal.vue'
 import QuizzesHeader from '@/components/QuizzesHeader.vue'
 import { capturing, showCamera, cancelLoading, view } from '@/global_state/state'
 
-const quizes = ref(quizData)
-const selectedCategory = ref('All') // New ref to track the selected category
 const showModal = ref(false)
-const route = useRoute()
-const quizId = route.params.quizId
+const quizId = ref(null)
+
+console.log(quizId)
 // const quizId = ref(null)
 
 onMounted(() => {
@@ -51,19 +44,21 @@ onMounted(() => {
 })
 
 // Computed property for filtering quizes based on category and search
-const filteredQuizes = computed(() => {
-  let filtered = quizes.value
-  if (selectedCategory.value !== 'All') {
-    filtered = filtered.filter((quiz) => quiz.name === selectedCategory.value)
-  }
-  return filtered
-})
+// const filteredQuizes = computed(() => {
+//   let filtered = quizes.value
+//   if (selectedCategory.value !== 'All') {
+//     filtered = filtered.filter((quiz) => quiz.name === selectedCategory.value)
+//   }
+//   return filtered
+// })
 
 // TODO
-const onSelectQuiz = () => {
+const onSelectQuiz = (quiz) => {
+  console.log('Quiz selected:', quiz)
   showModal.value = true
   showCamera.state = true
   cancelLoading.value = false
+  quizId.value = quiz.toString()
 }
 
 const closeModal = () => {
@@ -77,6 +72,6 @@ const handleFaceVerified = () => {
   showModal.value = false
   capturing.state = false
   showCamera.state = false
-  router.push(`/quiz/${quizId}`)
+  router.push(`/quiz/${quizId.value}`)
 }
 </script>
