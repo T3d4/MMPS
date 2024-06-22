@@ -1,6 +1,6 @@
 //Under development
 import { Router } from "express";
-import { QuizController } from "../controllers";
+import { QuizController, QuizResultController } from "../controllers";
 import {
     createQuizSchema,
     updateQuizSchema,
@@ -9,12 +9,13 @@ import {
 import { validator, authenticateToken, isAdmin } from "../middlewares";
 
 const { createQuiz, deleteQuiz, getAllQuizzes, getQuizById, updateQuiz } = new QuizController(); // Pass Quiz to controller
+const { getQuizResultsByUserId, saveQuizResult } = new QuizResultController();
 export const quizRouter = Router();
 
 // CREATE - Create a new quiz (Admin only)
 quizRouter.post(
     "/",
-    authenticateToken,
+    // authenticateToken,
     isAdmin,
     validator(createQuizSchema),
     createQuiz
@@ -32,7 +33,7 @@ quizRouter.get("/", getAllQuizzes);
 // UPDATE - Update a quiz by ID (Admin only)
 quizRouter.patch(
     "/:id",
-    authenticateToken,
+    // authenticateToken,
     isAdmin,
     validator(updateQuizSchema),
     updateQuiz
@@ -41,8 +42,16 @@ quizRouter.patch(
 // DELETE - Delete a quiz by ID (Admin only)
 quizRouter.delete(
     "/:id",
-    authenticateToken,
+    // authenticateToken,
     isAdmin,
     validator(deleteQuizSchema),
     deleteQuiz
+);
+
+quizRouter.get('/user/:userId',
+    getQuizResultsByUserId
+);
+
+quizRouter.post('/quiz-result',
+    saveQuizResult
 );

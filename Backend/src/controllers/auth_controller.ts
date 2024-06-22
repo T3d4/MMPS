@@ -4,9 +4,12 @@ import { NextFunction, Request, Response } from "express";
 import {
     generateAccessToken,
     generateRefreshToken,
+    hashPassword,
     refreshAccessToken,
 } from "../utils";
 import * as faceapi from 'face-api.js';
+import path from 'path';
+import { IUser } from "src/interfaces";
 
 // TODO
 // use user interface for enabling a contract between user variables
@@ -21,6 +24,77 @@ const refreshCookieConfig: object = {
 };
 
 export class AuthController {
+
+    public async signup(req: Request, res: Response, next: NextFunction) {
+        const { name, email, password, faceDescriptor } = req.body;
+
+        try {
+            if (!name || !email || !password || !faceDescriptor) {
+                return res.status(400).json({ message: "All fields are required." });
+            }
+
+            // Check if a user with the same email already exists
+            const existingUser = await User.findOne({ email });
+            if (existingUser) {
+                return res.status(400).json({ message: "User with this email already exists." });
+            }
+
+            // Check for unique face descriptor
+            const users = await User.find({});
+            for (const user of users) {
+                const labeledFaceDescriptors = new faceapi.LabeledFaceDescriptors(
+                    user.email,
+                    [Float32Array.from(user.faceDescriptor)]
+                );
+                const faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors, 0.6);
+                const bestMatch = faceMatcher.findBestMatch(new Float32Array(faceDescriptor));
+                if (bestMatch.distance < 0.6) {
+                    return res.status(400).json({ message: "Face descriptor already exists for another user." });
+                }
+            }
+
+            const hashedPassword: string = hashPassword(password);
+
+            // Create a new user object with hashed password and other fields
+            const newUser = {
+                name: name,
+                email: email,
+                isAdmin: req.body.isAdmin || false, // Set isAdmin to false if not provided
+                hash: hashedPassword,
+                faceDescriptor: faceDescriptor
+            };
+
+            const user = await User.create(newUser);
+
+
+            // Update the user document with the new refresh token
+            // newUser.refreshToken = refreshToken;
+            // await newUser.save();
+
+            // res.cookie("refreshToken", refreshToken, {
+            //     httpOnly: true,
+            //     maxAge: 72 * 60 * 60 * 1000,
+            //     secure: true,
+            //     sameSite: "none",
+            // });
+
+            const sanitizedUser = {
+                ...user.toObject(),
+                hash: undefined,
+                refreshToken: undefined,
+                otpExpiresBy: undefined,
+            };
+
+            // res.setHeader('Authorization', `Bearer ${accessToken}`);
+
+            return res.status(201).json({
+                message: "Signup Successful",
+                user: sanitizedUser,
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
 
     public async login(req: Request, res: Response, next: NextFunction) {
         const { email, password } = req.body;
@@ -38,6 +112,7 @@ export class AuthController {
                         user._id,
                         {
                             refreshToken: refreshToken,
+                            accessToken: accessToken
                         },
                         { new: true }
                     );
@@ -47,6 +122,8 @@ export class AuthController {
 
                     const sanitizedUser = {
                         ...user.toObject(),
+                        email: email,
+                        name: user.name,
                         hash: undefined,
                         refreshToken: undefined,
                         otpExpiresBy: undefined,
@@ -170,21 +247,21 @@ export class AuthController {
             }
 
             // Load models (only once, potentially on server startup)
-            await faceapi.nets.ssdMobilenetv1.loadFromDisk('../public/models');
-            await faceapi.nets.faceLandmark68Net.loadFromDisk('../public/models');
-            await faceapi.nets.faceRecognitionNet.loadFromDisk('../public/models');
+            // await faceapi.nets.ssdMobilenetv1.loadFromDisk(path.join(__dirname, '../public/models'));
+            // await faceapi.nets.faceLandmark68Net.loadFromDisk(path.join(__dirname, '../public/models'));
+            // await faceapi.nets.faceRecognitionNet.loadFromDisk(path.join(__dirname, '../public/models'));
 
             // Create LabeledFaceDescriptors and FaceMatcher
             const labeledFaceDescriptors = new faceapi.LabeledFaceDescriptors(
                 user.email,
                 [Float32Array.from(user.faceDescriptor)]
             );
-            const faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors, 0.6);
+            const faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors, 0.7);
 
             // Compare the descriptors
             const bestMatch = faceMatcher.findBestMatch(new Float32Array(faceDescriptor));
 
-            if (bestMatch.distance < 0.6) {
+            if (bestMatch.distance < 0.7) {
                 return res.status(200).json({ success: true, message: 'Face validated successfully', user });
             }
 
