@@ -6,3 +6,4 @@ export const capturing = reactive({ state: false });
 export const showCamera = reactive({ state: false });
 export const cancelLoading = reactive({ value: false })
 export const view = reactive({ value: null })
+export const currentTabState = reactive({value: "details"})
