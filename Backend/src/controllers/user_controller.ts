@@ -119,4 +119,13 @@ export class UserController {
             next(error);
         }
     }
+
+    public async getTotalUsers(req: Request, res: Response, next: NextFunction) {
+        try {
+            const totalUsers = await User.countDocuments();
+            res.status(200).json({ totalUsers });
+        } catch (error) {
+            next(error);
+        }
+    }
 }

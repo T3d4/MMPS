@@ -7,8 +7,10 @@ import {
 } from "../validators";
 import { validator, authenticateToken, isAdmin } from "../middlewares";
 
-const { deleteUser, getAllUsers, getUserById, updateUser } = new UserController();
+const { deleteUser, getAllUsers, getUserById, updateUser, getTotalUsers } = new UserController();
 export const userRouter = Router();
+
+userRouter.get("/total", getTotalUsers)
 
 // READ - Get all users (Admin only)
 userRouter.get(

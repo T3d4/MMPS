@@ -87,4 +87,15 @@ export class QuizController {
             next(error);
         }
     }
+
+    async getTotalQuizzes(req: Request, res: Response, next: NextFunction) {
+        try {
+            const totalQuizzes = await Quiz.countDocuments();
+            res.status(200).json({ totalQuizzes });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    
 }
