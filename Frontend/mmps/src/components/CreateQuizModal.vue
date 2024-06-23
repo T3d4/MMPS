@@ -1,8 +1,8 @@
 <!-- src/components/CreateQuizModal.vue -->
 <template>
   <div v-if="show" class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
-    <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-4xl">
-      <h2 class="text-2xl font-bold mb-4">Create New Quiz</h2>
+    <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-4xl text-gray-600">
+      <h2 class="text-2xl text-gray-800 font-bold mb-4">Create New Quiz</h2>
       <form @submit.prevent="createQuiz">
         <div class="mb-4">
           <label class="block text-gray-700 font-semibold mb-2">Quiz Title:</label>
