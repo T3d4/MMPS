@@ -1,33 +1,19 @@
 <template>
-  <div
-    v-if="show"
-    class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
-  >
+  <div v-if="show" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
     <div class="bg-white w-[400px] rounded-lg p-8 shadow-md relative">
       <h2 class="text-2xl font-semibold mb-4 text-gray-700">Facial Recognition</h2>
 
-      <div
-        class="relative w-[300px] mx-auto rounded-md border-[3px] border-indigo-500 shadow-md h-[227px] flex items-center justify-center"
-      >
-        <video
-          ref="video"
-          v-show="!isVideoLoading"
-          class="w-full h-full"
-          autoplay
-          playsinline
-          muted
-        ></video>
-        <div
-          v-if="isVideoLoading"
-          class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75"
-        >
+      <div class="relative w-[300px] mx-auto rounded-md border-[3px] border-indigo-500 shadow-md h-[227px] flex items-center justify-center">
+        <video ref="video" v-show="!isVideoLoading" class="w-full h-full" autoplay playsinline muted></video>
+        <div v-if="isVideoLoading" class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75">
           <div class="spinner"></div>
         </div>
       </div>
 
       <div v-if="faceAuthLoading" class="flex justify-center mt-4">
         <div class="spinner"></div>
-        <p class="text-gray-900 ml-2">Verifying...</p>
+        <p v-if="mode === 'quiz'" class="text-gray-900 ml-2">Verifying...</p>
+        <p v-else class="text-gray-900 ml-2">Capturing...</p>
       </div>
 
       <p v-if="!faceDetected && !faceAuthLoading" class="text-red-500 mt-2 pl-6">
@@ -35,11 +21,7 @@
       </p>
 
       <div class="flex justify-center gap-4 mt-4">
-        <button
-          @click="closeModal"
-          class="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400 text-gray-700 disabled:cursor-not-allowed disabled:opacity-60"
-          :disabled="isVideoLoading"
-        >
+        <button @click="closeModal" class="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400 text-gray-700 disabled:cursor-not-allowed disabled:opacity-60">
           Cancel
         </button>
       </div>
@@ -48,10 +30,15 @@
 </template>
 
 <script setup>
-import { ref, watch, onBeforeUnmount } from 'vue'
+import { ref, watch, onBeforeUnmount, computed } from 'vue'
 import { showCamera, cancelLoading } from '@/global_state/state'
 import * as faceapi from 'face-api.js'
-import axios from 'axios'
+import { useStore } from 'vuex'
+import authService from '@/services/authService'
+
+const store = useStore()
+const user = computed(() => store.getters.user)
+console.log(user.value.email)
 
 const props = defineProps({
   show: Boolean,
@@ -65,7 +52,7 @@ const props = defineProps({
     required: false
   }
 })
-
+const quizId = props.quizId
 const emit = defineEmits(['close', 'verified', 'notCaptured', 'faceDescriptor'])
 
 const faceDetected = ref(false)
@@ -146,18 +133,18 @@ const captureAndVerifyFace = async () => {
           emit('faceDescriptor', faceDescriptor)
           emit('verified')
         } else if (props.mode === 'quiz') {
-          const response = await axios.post('/api/v1/auth/validate-face', {
-            faceDescriptor,
-            quizId: props.quizId,
-            email: localStorage.getItem('user_email')
-          })
+          console.log(faceDescriptor, user.value.email)
 
-          if (response.data.success) {
+          const response = await authService.validateFace(faceDescriptor, user.value.email)
+
+          if (response.success) {
             faceCaptured.value = true
             faceVerified.value = true
             showCamera.state = false
             stopVideo()
             emit('verified')
+          } else {
+            errorMessage.value = response.data.message
           }
         }
       }
@@ -165,7 +152,7 @@ const captureAndVerifyFace = async () => {
       console.error(error)
       errorMessage.value = 'An error occurred during face verification.'
     }
-  }, 1000)
+  }, 500)
 }
 
 watch(showCamera, async (newShowCamera) => {

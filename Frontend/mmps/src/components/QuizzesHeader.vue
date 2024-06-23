@@ -1,27 +1,28 @@
 <template>
   <div class="w-full bg-white shadow-md z-10 p-2 flex items-center justify-between">
-    <h4 class="text-xl font-semibold text-gray-800">Welcome, {{ userFirstName }}</h4>
+    <h4 class="text-xl font-semibold text-gray-800">Welcome, {{ user.name.split(" ")[0] }}</h4>
     <div class="flex items-center space-x-4">
-      <router-link 
-        to="/" 
-        class="nav-link"
-        :class="{ 'active-link': $route.path === '/' }"
-      >Home</router-link>
-      <router-link 
-        to="/profile" 
+      <router-link to="/" class="nav-link" :class="{ 'active-link': $route.path === '/' }"
+        >Home</router-link
+      >
+      <router-link
+        to="/profile"
         class="nav-link"
         :class="{ 'active-link': $route.path === '/profile' }"
-      >Profile</router-link>
+        >Profile</router-link
+      >
       <button @click="logout" class="text-red-600 hover:text-red-800 font-bold pr-4">Logout</button>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useStore } from 'vuex'
 
-const userFirstName = ref(localStorage.getItem('firstName') || 'User')
+const store = useStore()
+const user = computed(() => store.getters.user)
 
 const router = useRouter()
 const $route = useRoute()

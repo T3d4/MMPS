@@ -18,7 +18,7 @@
     <div class="my-8 flex justify-center mr-4">
       <RouterLink
         @click="revertTimerState()"
-        to="/quizes"
+        to="/"
         class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600 transition duration-200 mr-4"
         >Go Back</RouterLink
       >
@@ -35,6 +35,7 @@
 <script setup>
 import { computed } from 'vue'
 import { timeLeft, timeTaken } from '@/global_state/state'
+
 const props = defineProps({
   numberOfCorrectAnswers: Number,
   quizQuestionLength: Number,

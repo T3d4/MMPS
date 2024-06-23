@@ -22,9 +22,11 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed } from 'vue'
+import { useStore } from 'vuex';
 
-const email = ref('')
+const store = useStore()
+const email = computed(()=>store.getters.user.email)
 
 const sendResetLink = () => {
   // Simulate sending a reset link

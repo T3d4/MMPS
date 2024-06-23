@@ -7,7 +7,7 @@
           <router-link
             to="/admin"
             class="nav-link"
-            :class="{ 'active-link': $route.path === '/admin' }"
+            :class="{ 'active-link': $route.path == '/admin' }"
           >
             Home
           </router-link>
@@ -16,7 +16,7 @@
           <router-link
             to=""
             class="nav-link"
-            :class="{ 'active-link': $route.path === '/admin/user-management' }"
+            :class="{ 'active-link': isActive('/admin/user-management') }"
             @click.capture="confirmNavigation('/admin/user-management', 'User Management')"
           >
             Users
@@ -26,7 +26,7 @@
           <router-link
             to=""
             class="nav-link"
-            :class="{ 'active-link': $route.path === '/admin/quiz-management' }"
+            :class="{ 'active-link': isActive('/admin/quiz-management') }"
             @click.capture="confirmNavigation('/admin/quiz-management', 'Quiz Management')"
           >
             Quizzes
@@ -36,7 +36,7 @@
           <router-link
             to=""
             class="nav-link"
-            :class="{ 'active-link': $route.path === '/admin/statistics' }"
+            :class="{ 'active-link': isActive('/admin/statistics') }"
             @click.capture="confirmNavigation('/admin/statistics', 'Statistics')"
           >
             Statistics
@@ -46,9 +46,10 @@
           <router-link
             to="/profile"
             class="nav-link"
-            :class="{ 'active-link': $route.path === '/profile' }"
-            >Profile</router-link
+            :class="{ 'active-link': isActive('/profile') }"
           >
+            Profile
+          </router-link>
         </li>
         <li class="flex items-center">
           <button
@@ -91,7 +92,6 @@
 <script setup>
 import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import ProfileDetails from './ProfileDetails.vue'
 
 const $route = useRoute()
 const router = useRouter()
@@ -101,7 +101,6 @@ const targetPath = ref('')
 const section = ref(null)
 
 const confirmNavigation = (path, sectionName) => {
-  console.log(path)
   section.value = sectionName
   targetPath.value = path
   showModal.value = true
@@ -121,6 +120,10 @@ const logout = () => {
   // Clear user data from local storage or any other necessary cleanup
   localStorage.clear()
   router.push('/login')
+}
+
+const isActive = (path) => {
+  return $route.path.startsWith(path)
 }
 </script>
 

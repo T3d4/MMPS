@@ -75,22 +75,21 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, reactive } from 'vue'
 import router from '@/router'
 import TextInput from '@/components/TextInput.vue'
 import PasswordInput from '@/components/PasswordInput.vue'
 import FacialRecognitionModal from '@/components/FacialRecoginitionModal.vue'
 import { capturing, showCamera, cancelLoading } from '@/global_state/state'
-import axios from 'axios'
 
-const signup = ref({
+const signup = reactive({
   name: '',
   email: '',
   password: '',
   faceDescriptor: null
 })
 
-const confirmPassword = ref({
+const confirmPassword = reactive({
   confirmPwd: ''
 })
 
@@ -98,7 +97,7 @@ const errorMessage = ref('')
 const faceCaptured = ref(false)
 const showModal = ref(false)
 
-const passwordsMatch = computed(() => signup.value.password === confirmPassword.value.confirmPwd)
+const passwordsMatch = computed(() => signup.password === confirmPassword.confirmPwd)
 
 const initFaceCapture = () => {
   showModal.value = true
@@ -108,7 +107,7 @@ const initFaceCapture = () => {
 }
 
 const handleFaceCaptured = (descriptor) => {
-  signup.value.faceDescriptor = descriptor
+  signup.faceDescriptor = descriptor
   faceCaptured.value = true
   showModal.value = false
   capturing.state = false
@@ -140,9 +139,15 @@ const signupUser = async () => {
   }
 
   try {
-    const response = await axios.post('/api/v1/auth/signup', signup.value)
+    const response = await this.$axios.post('/auth/signup', {
+      name: signup.name,
+      email: signup.email,
+      password: signup.password,
+      faceDescriptor: signup.faceDescriptor
+    })
+
     if (response.data.success) {
-      router.push('/quizes')
+      router.push('/quizzes')
     } else {
       errorMessage.value = response.data.message
     }
