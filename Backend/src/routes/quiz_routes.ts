@@ -16,7 +16,7 @@ export const quizRouter = Router();
 quizRouter.post(
     "/",
     // authenticateToken,
-    isAdmin,
+    // isAdmin,
     validator(createQuizSchema),
     createQuiz
 );
@@ -34,7 +34,7 @@ quizRouter.get("/", getAllQuizzes);
 quizRouter.patch(
     "/:id",
     // authenticateToken,
-    isAdmin,
+    // isAdmin,
     validator(updateQuizSchema),
     updateQuiz
 );
@@ -43,7 +43,7 @@ quizRouter.patch(
 quizRouter.delete(
     "/:id",
     // authenticateToken,
-    isAdmin,
+    // isAdmin,
     validator(deleteQuizSchema),
     deleteQuiz
 );
