@@ -81,6 +81,7 @@ import TextInput from '@/components/TextInput.vue'
 import PasswordInput from '@/components/PasswordInput.vue'
 import FacialRecognitionModal from '@/components/FacialRecoginitionModal.vue'
 import { capturing, showCamera, cancelLoading } from '@/global_state/state'
+import { axiosInstance } from '@/axiosConfig'
 
 const signup = reactive({
   name: '',
@@ -139,7 +140,7 @@ const signupUser = async () => {
   }
 
   try {
-    const response = await this.$axios.post('/auth/signup', {
+    const response = await axiosInstance.post('/auth/signup', {
       name: signup.name,
       email: signup.email,
       password: signup.password,
