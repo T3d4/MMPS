@@ -9,6 +9,7 @@
         <div class="grid grid-flow-col">
           <Question
             :question="quiz.questions[currentQuestionIndex]"
+            :selected-option="selectedOptions[currentQuestionIndex]"
             @selectOption="onOptionSelected"
           />
           <!-- Sidebar for navigating questions -->
@@ -48,7 +49,6 @@ import Result from '@/components/ResultComponent.vue'
 import QuestionSidebar from '@/components/QuestionSidebar.vue'
 import ConfirmationModal from '@/components/ConfirmationModal.vue'
 import { useRoute } from 'vue-router'
-// import quizes from '@/data/quizzes.json'
 import { timeLeft, timeTaken } from '@/global_state/state'
 import { useStore } from 'vuex'
 import { axiosInstance } from '@/axiosConfig'
@@ -60,13 +60,14 @@ const quizId = ref(Number(route.params.id))
 const quiz = ref(null)
 const showResults = ref(false)
 const currentQuestionIndex = ref(0)
-const userAnswers = reactive([])
+const userAnswers = reactive({})
 const answeredQuestions = reactive([])
 const numberOfCorrectAnswers = ref(0)
 let timerInterval = null
 const showConfirmationModal = ref(false)
 const isLoading = ref(true)
 const originalDuration = ref(0)
+const selectedOptions = reactive([])
 
 const fetchQuizzes = async () => {
   try {
@@ -76,6 +77,11 @@ const fetchQuizzes = async () => {
     if (quiz.value) {
       originalDuration.value = quiz.value.duration * 60
       timeLeft.time = quiz.value.duration * 60 // Set initial time
+      selectedOptions.splice(
+        0,
+        selectedOptions.length,
+        ...Array(quiz.value.questions.length).fill(null)
+      ) // Initialize selected options
     }
     isLoading.value = false
   } catch (error) {
@@ -93,25 +99,62 @@ const barPercentage = computed(
   () => `${(answeredQuestions.length / quiz.value.questions.length) * 100}%`
 )
 
-const onOptionSelected = (isCorrect) => {
-  userAnswers.push(
-    quiz.value.questions[currentQuestionIndex.value].options.find(
-      (option) => option.isCorrect === isCorrect
-    ).text
-  )
-  if (isCorrect) {
-    numberOfCorrectAnswers.value++
-  }
+const onOptionSelected = ({ optionId }) => {
+  const currentQuestion = quiz.value.questions[currentQuestionIndex.value]
 
+  // Check if the current question has already been answered
   if (!answeredQuestions.includes(currentQuestionIndex.value)) {
+    // Add the current question index to answered questions
     answeredQuestions.push(currentQuestionIndex.value)
+
+    // Find the selected option from the current question's options
+    const selectedOption = currentQuestion.options.find((option) => option.id === optionId)
+
+    // Determine if the selected option is correct
+    const isCorrect = selectedOption.text === currentQuestion.correctAnswer
+
+    // Update the userAnswers object with the selected option details
+    userAnswers[currentQuestionIndex.value] = {
+      question: currentQuestion.text,
+      selectedOption: selectedOption.text,
+      isCorrect: isCorrect
+    }
+
+    // Update the selectedOptions array with the selected option ID
+    selectedOptions[currentQuestionIndex.value] = optionId
+
+    // Update the number of correct answers if the selected option is correct
+    if (isCorrect) {
+      numberOfCorrectAnswers.value++
+    }
+  } else {
+    // If the question has already been answered, allow changing the selection
+    // Remove the previous answer from userAnswers and selectedOptions
+    delete userAnswers[currentQuestionIndex.value]
+    selectedOptions[currentQuestionIndex.value] = null
+
+    // Proceed with selecting the new option
+    const selectedOption = currentQuestion.options.find((option) => option.id === optionId)
+    const isCorrect = selectedOption.text === currentQuestion.correctAnswer
+
+    userAnswers[currentQuestionIndex.value] = {
+      question: currentQuestion.text,
+      selectedOption: selectedOption.text,
+      isCorrect: isCorrect
+    }
+
+    selectedOptions[currentQuestionIndex.value] = optionId
+
+    // Update the number of correct answers if the selected option is correct
+    if (isCorrect) {
+      numberOfCorrectAnswers.value++
+    }
   }
 
-  if (quiz.value.questions.length - 1 === currentQuestionIndex.value) {
-    currentQuestionIndex.value -= 1
+  // Move to the next question if not the last question
+  if (currentQuestionIndex.value < quiz.value.questions.length - 1) {
+    currentQuestionIndex.value++
   }
-
-  currentQuestionIndex.value++
 }
 
 const submitQuiz = async () => {
@@ -119,22 +162,35 @@ const submitQuiz = async () => {
   clearInterval(timerInterval)
   showConfirmationModal.value = false
 
-  // Collect quiz result data
+  // Initialize variables to store results
+  let correctAnswersCount = 0
+  const totalQuestions = quiz.value.questions.length
+  const answeredQuestions = Object.keys(userAnswers).length
+
+  // Calculate the number of correct answers
+  Object.values(userAnswers).forEach((answer) => {
+    if (answer.isCorrect) {
+      correctAnswersCount++
+    }
+  })
+
+  // Display results to the user
+  numberOfCorrectAnswers.value = correctAnswersCount
+
+  // Optionally, you can also store these results in a backend or Vuex store
   const quizResult = {
     date: new Date().toISOString(),
     quizName: quiz.value.name,
     timeTaken: timeTaken.time / 60,
-    totalQuestions: quiz.value.questions.length,
-    answeredQuestions: answeredQuestions.length,
-    correctAnswers: numberOfCorrectAnswers.value,
+    totalQuestions: totalQuestions,
+    answeredQuestions: answeredQuestions,
+    correctAnswers: correctAnswersCount,
     userId: store.getters.user._id
   }
 
   try {
     const response = await axiosInstance.post('/quiz/quiz-result', quizResult)
     console.log(response)
-    // Optionally, store locally or in Vuex for immediate access
-    // store.commit('addQuizResult', quizResult)
   } catch (error) {
     console.error('Error submitting quiz result:', error)
   }
@@ -146,12 +202,17 @@ const navigateToQuestion = (index) => {
 
 const restartQuiz = () => {
   currentQuestionIndex.value = 0
-  userAnswers.splice(0, userAnswers.length)
+  Object.keys(userAnswers).forEach((key) => delete userAnswers[key])
   numberOfCorrectAnswers.value = 0
   answeredQuestions.length = 0
   showResults.value = false
   timeLeft.time = originalDuration.value // Reset to original duration
   timeTaken.time = 0
+  selectedOptions.splice(
+    0,
+    selectedOptions.length,
+    ...Array(quiz.value.questions.length).fill(null)
+  )
 }
 
 watchEffect(() => {
