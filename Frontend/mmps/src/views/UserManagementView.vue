@@ -6,10 +6,18 @@
     <div class="flex flex-col items-center h-full w-full">
       <h1 class="text-3xl font-bold text-gray-300 mt-4 mb-8">User Management</h1>
 
+      <!-- Search Input -->
+      <input
+        v-model="searchQuery"
+        type="text"
+        placeholder="Search by name"
+        class="mb-4 p-2 rounded bg-gray-700 text-gray-300 border border-gray-500 w-1/4"
+      />
+
       <div class="flex-grow w-full mt-8 px-14">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <UserCard
-            v-for="user in users"
+            v-for="user in filteredUsers"
             :key="user.id"
             :user="user"
             :userSelected="onSelectUser"
@@ -24,7 +32,7 @@
         @close="closeModal"
       />
 
-      <p v-if="users.length === 0" class="text-gray-600 mt-4">No users available.</p>
+      <p v-if="filteredUsers.length === 0" class="text-gray-600 mt-4">No users available.</p>
     </div>
   </div>
 </template>
@@ -53,6 +61,7 @@ axiosInstance.interceptors.request.use(
 const users = ref([])
 const showModal = ref(false)
 const selectedUser = ref(null)
+const searchQuery = ref('') // Add search query
 
 const fetchUsers = async () => {
   try {
@@ -65,6 +74,7 @@ const fetchUsers = async () => {
 }
 
 onMounted(fetchUsers)
+
 const onSelectUser = (user) => {
   selectedUser.value = user
   showModal.value = true
@@ -78,4 +88,11 @@ const handleActionConfirmed = () => {
   showModal.value = false
   // Perform actions based on user selection
 }
+
+// Computed property to filter users based on search query and exclude admins
+const filteredUsers = computed(() => {
+  return users.value.filter(
+    (user) => !user.isAdmin && user.name.toLowerCase().includes(searchQuery.value.toLowerCase())
+  )
+})
 </script>

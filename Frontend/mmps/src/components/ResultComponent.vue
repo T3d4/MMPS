@@ -40,11 +40,12 @@ const props = defineProps({
   numberOfCorrectAnswers: Number,
   quizQuestionLength: Number,
   quizQuestions: Array,
-  yourAnswers: Array
+  yourAnswers: Array,
+  duration: Number
 })
 // Function to format time taken (e.g., in minutes and seconds)
 function revertTimerState() {
-  timeLeft.time = 120
+  timeLeft.time = props.duration
   timeTaken.time = 0
 }
 // Function to format time taken

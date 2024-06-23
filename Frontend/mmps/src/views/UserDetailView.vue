@@ -7,6 +7,13 @@
     <div class="flex flex-col items-center h-full w-full">
       <h1 class="text-3xl font-bold text-gray-300 mb-8 mt-4">User Details</h1>
 
+      <button
+        @click="goBack"
+        class="self-start bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded ml-32"
+      >
+        Back
+      </button>
+
       <div class="flex w-full mt-8 px-32 max-h-500px">
         <!-- Left Menu or Navigation -->
         <div class="min-w-[200px] w-[500px] lg:w-1/3 mr-4 h-60 bg-gray-800 rounded-l-lg p-4">
@@ -37,23 +44,19 @@
         </div>
 
         <!-- Right Content Section -->
-        <div class="min-w-[400px] w-[600px] lg:w-1/2 p-10 bg-white shadow-md rounded-r-lg">
+        <div
+          class="min-w-[400px] w-[600px] max-h-[60dvh] lg:w-1/2 p-10 bg-white shadow-md rounded-r-lg overflow-y-auto"
+        >
           <div v-if="currentTab === 'details'">
             <h2 class="text-3xl font-bold mb-6 text-gray-800">{{ user.name }}</h2>
-            <p class="text-gray-600">{{ user.role }}</p>
+            <!-- <p class="text-gray-600">{{ user.role }}</p> -->
             <h3 class="text-xl text-gray-600 font-bold mb-2">Scores of Previous Quizzes</h3>
             <ul class="mb-4">
               <li v-for="(quiz, index) in user.quizzes" :key="index" class="text-gray-600">
-                {{ quiz.name }}: {{ quiz.score }} -
+                {{ quiz.quizName }}: {{ quiz.correctAnswers }} / {{ quiz.totalQuestions }} -
                 <span class="text-gray-400">
-                  {{ formatDate(quiz.dateTaken) }}
+                  {{ formatDate(quiz.date) }}
                 </span>
-              </li>
-            </ul>
-            <h3 class="text-3xl font-bold mb-6 text-gray-800">Likes</h3>
-            <ul class="mb-4">
-              <li v-for="(like, index) in user.likes" :key="index" class="text-gray-600">
-                {{ like }}
               </li>
             </ul>
           </div>
@@ -108,8 +111,7 @@ import AdminHeader from '@/components/AdminHeader.vue'
 import { useRoute } from 'vue-router'
 import { view } from '@/global_state/state'
 import { axiosInstance } from '@/axiosConfig' // Adjust the path as needed
-
-onMounted(() => (view.value = 'admin'))
+import router from '@/router'
 
 const route = useRoute()
 const userId = ref(route.params.id)
@@ -121,6 +123,10 @@ const user = ref({
   email: '',
   quizzes: []
 })
+
+const goBack = () => {
+  router.go(-1)
+}
 
 // Fetch user data based on userId
 const fetchUserData = async (id) => {
@@ -134,8 +140,15 @@ const fetchUserData = async (id) => {
   }
 }
 
+const fetchUserQuizData = async (id) => {
+  const response = await axiosInstance.get(`/quiz/user/${id}`)
+  user.value.quizzes = response.data
+}
+
 onMounted(() => {
   fetchUserData(userId.value)
+  fetchUserQuizData(userId.value)
+  view.value = 'admin'
 })
 
 const updateUser = async () => {

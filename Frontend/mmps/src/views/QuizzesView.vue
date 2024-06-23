@@ -28,33 +28,31 @@
 import { ref, onMounted } from 'vue'
 import router from '@/router'
 import Card from '@/components/QuizCard.vue'
-import quizData from '@/data/quizzes.json'
 import FacialRecognitionModal from '@/components/FacialRecoginitionModal.vue'
 import QuizzesHeader from '@/components/QuizzesHeader.vue'
-import { capturing, showCamera, cancelLoading, view } from '@/global_state/state'
+import { capturing, showCamera, cancelLoading, view, timeLeft } from '@/global_state/state'
+import { axiosInstance } from '@/axiosConfig'
 
 const showModal = ref(false)
 const quizId = ref(null)
+const quizData = ref([])
 
 console.log(quizId)
 // const quizId = ref(null)
 
 onMounted(() => {
   view.value = 'user'
+  fetchQuizzes()
 })
 
-// Computed property for filtering quizes based on category and search
-// const filteredQuizes = computed(() => {
-//   let filtered = quizes.value
-//   if (selectedCategory.value !== 'All') {
-//     filtered = filtered.filter((quiz) => quiz.name === selectedCategory.value)
-//   }
-//   return filtered
-// })
-
+const fetchQuizzes = async () => {
+  const response = await axiosInstance.get('/quiz')
+  quizData.value = response.data
+}
 // TODO
-const onSelectQuiz = (quiz) => {
+const onSelectQuiz = (quiz, time) => {
   console.log('Quiz selected:', quiz)
+  timeLeft.time = time * 60
   showModal.value = true
   showCamera.state = true
   cancelLoading.value = false

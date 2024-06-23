@@ -1,9 +1,9 @@
 <template>
   <div
-    class="min-w-[400px] w-[600px] lg:w-1/2 p-10 bg-white shadow-md rounded-r-lg max-h-[68dvh] overflow-y-auto"
+    class="min-w-[400px] w-[600px] lg:w-1/2 p-10 bg-white shadow-md rounded-r-lg max-h-[60dvh] overflow-y-auto"
   >
     <div v-if="currentTabState.value === 'details'">
-      <h2 class="text-3xl font-bold mb-4 text-gray-800">{{ quiz.title }}</h2>
+      <h2 class="text-3xl font-bold mb-4 text-gray-800">{{ quiz.name }}</h2>
       <p class="text-gray-600">Created at: {{ formatDate(quiz.dateCreated) }}</p>
       <p class="text-gray-600">Duration: {{ quiz.duration }} minutes</p>
       <h3 class="text-xl text-gray-700 font-bold mb-2 mt-4">Questions</h3>
@@ -11,13 +11,9 @@
         <li v-for="(question, qIndex) in quiz.questions" :key="qIndex" class="mb-4">
           <p class="text-gray-700">{{ qIndex + 1 }}. {{ question.text }}</p>
           <ul>
-            <li v-for="(answer, aIndex) in question.answers" :key="aIndex" class="text-gray-600">
-              <span
-                :class="{
-                  'font-bold text-green-600': aIndex === question.correctAnswerIndex
-                }"
-              >
-                {{ aIndex + 1 }}. {{ answer.text }}
+            <li v-for="(option, oIndex) in question.options" :key="oIndex" class="text-gray-600">
+              <span :class="{ 'font-bold text-green-600': option.text === question.correctAnswer }">
+                {{ String.fromCharCode(97 + oIndex) }}. {{ option.text }}
               </span>
             </li>
           </ul>
@@ -29,9 +25,9 @@
       <h2 class="text-3xl font-bold mb-6 text-gray-800">Update Quiz</h2>
       <form @submit.prevent="updateQuiz">
         <div class="mb-4">
-          <label class="block text-gray-700 font-semibold mb-2">Title:</label>
+          <label class="block text-gray-700 font-semibold mb-2">Name:</label>
           <input
-            v-model="quiz.title"
+            v-model="quiz.name"
             type="text"
             class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
@@ -57,20 +53,20 @@
               required
             />
             <div
-              v-for="(answer, aIndex) in question.answers"
-              :key="aIndex"
+              v-for="(option, oIndex) in question.options"
+              :key="oIndex"
               class="flex items-center mt-2"
             >
               <input
-                v-model="answer.text"
+                v-model="option.text"
                 type="text"
                 class="flex-grow p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter answer"
+                placeholder="Enter option"
                 required
               />
               <input
-                v-model="question.correctAnswerIndex"
-                :value="aIndex"
+                v-model="question.correctAnswer"
+                :value="option.text"
                 type="radio"
                 class="ml-2"
                 :name="'correctAnswer-' + qIndex"
@@ -79,10 +75,10 @@
             </div>
             <button
               type="button"
-              @click="addAnswer(qIndex)"
+              @click="addOption(qIndex)"
               class="bg-green-500 text-white py-1 px-3 rounded mt-2 hover:bg-green-700"
             >
-              Add Answer
+              Add Option
             </button>
             <button
               type="button"
@@ -125,76 +121,106 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { formatDate } from '@/utils/date'
 import { currentTabState } from '@/global_state/state'
+import { axiosInstance } from '@/axiosConfig'
 
 const route = useRoute()
+const router = useRouter()
 const quizId = ref(route.params.id)
 const quiz = ref({
   id: '',
-  title: '',
+  name: '',
   dateCreated: '',
   duration: 0,
   questions: []
 })
 
-const addQuestion = () => {
-  quiz.value.questions.push({ text: '', answers: [], correctAnswerIndex: null })
+// Fetch quiz data based on quizId
+const fetchQuizData = async (id) => {
+  try {
+    const response = await axiosInstance.get(`/quiz/${id}`)
+    const { _id, ...rest } = response.data
+    quiz.value = { id: _id, ...rest }
+  } catch (error) {
+    console.error('Error fetching quiz data:', error)
+  }
 }
 
-const addAnswer = (questionIndex) => {
-  quiz.value.questions[questionIndex].answers.push({ text: '' })
+const addQuestion = () => {
+  quiz.value.questions.push({ text: '', options: [], correctAnswer: null })
+}
+
+const addOption = (questionIndex) => {
+  quiz.value.questions[questionIndex].options.push({ text: '', isCorrect: false })
 }
 
 const removeQuestion = (questionIndex) => {
   quiz.value.questions.splice(questionIndex, 1)
 }
 
-const validateAnswers = (question) => {
+const validateOptions = (question) => {
   return (
-    question.answers.length > 1 &&
-    question.correctAnswerIndex !== null &&
-    question.correctAnswerIndex >= 0 &&
-    question.correctAnswerIndex < question.answers.length
+    question.options.length > 1 &&
+    question.correctAnswer !== null &&
+    question.options.some((option) => option.text === question.correctAnswer)
   )
 }
 
-const updateQuiz = () => {
-  if (quiz.value.questions.every(validateAnswers)) {
-    console.log('Quiz updated:', quiz.value)
-    // Replace with actual update logic, e.g., API call
-  } else {
-    console.error('Some questions have invalid answers')
+const updateQuiz = async () => {
+  try {
+    if (quiz.value.questions.every(validateOptions)) {
+      const updatedQuiz = {
+        id: quiz.value.id,
+        name: quiz.value.name,
+        dateCreated: quiz.value.dateCreated,
+        questions: quiz.value.questions.map((question) => ({
+          id: question.id,
+          text: question.text,
+          correctAnswer: question.correctAnswer,
+          options: question.options.map((option) => ({
+            id: option.id,
+            label: option.label,
+            text: option.text
+          }))
+        }))
+      }
+
+      // Log the request payload for debugging
+      console.log('Updating quiz with payload:', updatedQuiz)
+
+      // Make the API request to update the quiz
+      const response = await axiosInstance.patch(`/quiz/${quizId.value}`, updatedQuiz)
+
+      console.log('Quiz updated:', response.data)
+      alert('Quiz updated successfully')
+    } else {
+      console.error('Some questions have invalid options')
+      alert('Some questions have invalid options')
+    }
+  } catch (error) {
+    console.error('Error updating quiz:', error.response ? error.response.data : error.message)
+    alert(
+      'Failed to update quiz: ' + (error.response ? error.response.data.message : error.message)
+    )
   }
 }
 
-const deleteQuiz = () => {
-  console.log('Quiz deleted:', quiz.value.id)
-  // Replace with actual delete logic, e.g., API call
+const deleteQuiz = async () => {
+  try {
+    const response = await axiosInstance.delete(`/quiz/${quiz.value.id}`)
+    console.log('Quiz deleted:', response.data)
+    alert('Quiz deleted successfully')
+    router.push('/quizzes')
+  } catch (error) {
+    console.error('Error deleting quiz:', error)
+    alert('Failed to delete quiz')
+  }
 }
 
 onMounted(() => {
-  // Fetch quiz data by ID (replace with actual data fetching logic)
-  // Dummy data example:
-  quiz.value = {
-    id: quizId.value,
-    title: 'Sample Quiz',
-    dateCreated: '2023-01-01T00:00:00Z',
-    duration: 30,
-    questions: [
-      {
-        text: 'What is 2+2?',
-        answers: [{ text: '3' }, { text: '4' }, { text: '5' }],
-        correctAnswerIndex: 1
-      },
-      {
-        text: 'What is the capital of France?',
-        answers: [{ text: 'Berlin' }, { text: 'Madrid' }, { text: 'Paris' }],
-        correctAnswerIndex: 2
-      }
-    ]
-  }
+  fetchQuizData(quizId.value)
 })
 </script>
 

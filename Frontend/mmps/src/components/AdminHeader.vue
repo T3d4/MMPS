@@ -90,6 +90,7 @@
 </template>
 
 <script setup>
+import store from '@/store/store'
 import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
@@ -116,9 +117,9 @@ const proceedNavigation = () => {
   router.push(targetPath.value)
 }
 
-const logout = () => {
+const logout = async () => {
   // Clear user data from local storage or any other necessary cleanup
-  localStorage.clear()
+  await store.dispatch('logout')
   router.push('/login')
 }
 
