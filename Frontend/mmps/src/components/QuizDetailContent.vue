@@ -209,7 +209,7 @@ const updateQuiz = async () => {
 
 const deleteQuiz = async () => {
   try {
-    const response = await axiosInstance.delete(`/quiz/${quiz.value.id}`)
+    const response = await axiosInstance.delete(`/quiz/${quizId.value}`)
     console.log('Quiz deleted:', response.data)
     alert('Quiz deleted successfully')
     router.push('/quizzes')
