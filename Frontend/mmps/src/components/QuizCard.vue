@@ -12,11 +12,11 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
-import { useStore } from 'vuex';
+import { computed } from 'vue'
+import { useStore } from 'vuex'
 
 const store = useStore()
-const isAdmin = computed(()=> store.getters.isAdmin)
+const isAdmin = computed(() => store.getters.isAdmin)
 
 const props = defineProps({ quiz: Object })
 const emit = defineEmits(['quizSelected'])
@@ -24,7 +24,8 @@ const emit = defineEmits(['quizSelected'])
 console.log(props.quiz)
 
 const selectQuiz = () => {
-  emit('quizSelected', props.quiz.id, props.quiz.duration)
+  const quizId = store.getters.isAdmin ? props.quiz._id : props.quiz.id
+  emit('quizSelected', quizId, props.quiz.duration)
 }
 
 const formatDate = (dateString) => {

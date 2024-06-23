@@ -218,7 +218,7 @@ const deleteQuiz = async () => {
     alert('Failed to delete quiz')
   }
 }
-
+console.log(quizId.value)
 onMounted(() => {
   fetchQuizData(quizId.value)
 })
