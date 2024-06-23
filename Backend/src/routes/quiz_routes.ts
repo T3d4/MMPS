@@ -8,15 +8,15 @@ import {
 } from "../validators";
 import { validator, authenticateToken, isAdmin } from "../middlewares";
 
-const { createQuiz, deleteQuiz, getAllQuizzes, getQuizById, updateQuiz } = new QuizController(); // Pass Quiz to controller
+const { createQuiz, deleteQuiz, getAllQuizzes, getQuizById, updateQuiz, getTotalQuizzes } = new QuizController(); // Pass Quiz to controller
 const { getQuizResultsByUserId, saveQuizResult } = new QuizResultController();
 export const quizRouter = Router();
+
+quizRouter.get("/total", getTotalQuizzes)
 
 // CREATE - Create a new quiz (Admin only)
 quizRouter.post(
     "/",
-    // authenticateToken,
-    // isAdmin,
     validator(createQuizSchema),
     createQuiz
 );
@@ -33,8 +33,6 @@ quizRouter.get("/", getAllQuizzes);
 // UPDATE - Update a quiz by ID (Admin only)
 quizRouter.patch(
     "/:id",
-    // authenticateToken,
-    // isAdmin,
     validator(updateQuizSchema),
     updateQuiz
 );
@@ -42,8 +40,6 @@ quizRouter.patch(
 // DELETE - Delete a quiz by ID (Admin only)
 quizRouter.delete(
     "/:id",
-    // authenticateToken,
-    // isAdmin,
     validator(deleteQuizSchema),
     deleteQuiz
 );
