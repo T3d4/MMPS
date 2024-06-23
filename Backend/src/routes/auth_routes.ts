@@ -3,7 +3,7 @@ import { validator } from "../middlewares";
 import { AuthController } from "../controllers";
 import { Router } from "express";
 import {
-    createUserSchema,
+    signupSchema,
     loginSchema,
 } from "../validators";
 
@@ -11,15 +11,18 @@ const {
     login,
     refresh,
     logout,
+    signup,
     validateFace
 } = new AuthController();
 
-import {authenticateToken} from "../middlewares";
+// import {authenticateToken} from "../middlewares";
 
 export const authRouter = Router();
 
 // admin or user logs in
 authRouter.route("/login").post(validator(loginSchema), login);
+
+authRouter.route("/signup").post(validator(signupSchema), signup)
 
 // checks if the refresh token stored in cookie is valid and renews the accesstoken
 authRouter.route("/refresh").get(refresh);
@@ -29,4 +32,4 @@ authRouter.route("/refresh").get(refresh);
 
 // clears cookies and loggs out user
 authRouter.route("/logout").get(logout);
-authRouter.post("/validateFace");
+authRouter.route("/validate-face").post(validateFace);
