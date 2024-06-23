@@ -38,7 +38,6 @@ import authService from '@/services/authService'
 
 const store = useStore()
 const user = computed(() => store.getters.user)
-console.log(user.value.email)
 
 const props = defineProps({
   show: Boolean,
