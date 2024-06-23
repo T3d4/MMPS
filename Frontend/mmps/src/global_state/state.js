@@ -1,6 +1,6 @@
 import { reactive } from "vue";
 
-export const timeLeft = reactive({ time: 120 });
+export const timeLeft = reactive({ time: 0 });
 export const timeTaken = reactive({ time: 0 });
 export const capturing = reactive({ state: false });
 export const showCamera = reactive({ state: false });

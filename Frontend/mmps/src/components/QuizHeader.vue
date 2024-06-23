@@ -1,9 +1,9 @@
 <template>
-  <div class="  w-full bg-white shadow-md z-10 p-4">
+  <div class="w-full bg-white shadow-md z-10 p-4">
     <div class="flex items-center justify-between">
       <h4 class="text-xl font-semibold text-gray-800">Question {{ questionStatus }}</h4>
       <div class="timer">
-        <span class="text-lg text-gray-600">Time: {{ formatTimeTaken(timeLeft.time) }}</span>
+        <span class="text-lg text-gray-600">Time Left: {{ formatTimeTaken(timeLeft.time) }}</span>
       </div>
       <div class="bar w-64 h-6 bg-gray-200 rounded-full">
         <div
@@ -23,7 +23,7 @@ const { questionStatus, barPercentage } = defineProps(['questionStatus', 'barPer
 function formatTimeTaken(seconds) {
   const minutes = Math.floor(seconds / 60)
   const remainingSeconds = seconds % 60
-  return `${minutes}m ${remainingSeconds}s`
+  return `${minutes}m : ${remainingSeconds}s`
 }
 </script>
 

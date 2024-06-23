@@ -4,7 +4,8 @@
     <QuizHeader :quiz="quiz" :question-status="questionStatus" :bar-percentage="barPercentage" />
 
     <div class="flex-1 flex justify-center items-center">
-      <div v-if="!showResults" class="w-[50%] flex items-center justify-center">
+      <div v-if="isLoading" class="flex items-center justify-center min-h-screen">Loading...</div>
+      <div v-else-if="!showResults && !isLoading" class="w-[50%] flex items-center justify-center">
         <div class="grid grid-flow-col">
           <Question
             :question="quiz.questions[currentQuestionIndex]"
@@ -27,6 +28,7 @@
         :quizQuestions="quiz.questions"
         :yourAnswers="userAnswers"
         @retakeQuiz="restartQuiz"
+        :duration="quiz.duration"
       />
     </div>
   </div>
@@ -39,21 +41,23 @@
 </template>
 
 <script setup>
-import { ref, computed, reactive, watchEffect, onBeforeUnmount } from 'vue'
+import { ref, computed, reactive, watchEffect, onBeforeUnmount, onMounted } from 'vue'
 import Question from '@/components/QuestionComponent.vue'
 import QuizHeader from '@/components/QuizHeader.vue'
 import Result from '@/components/ResultComponent.vue'
 import QuestionSidebar from '@/components/QuestionSidebar.vue'
 import ConfirmationModal from '@/components/ConfirmationModal.vue'
 import { useRoute } from 'vue-router'
-import quizes from '@/data/quizzes.json'
+// import quizes from '@/data/quizzes.json'
 import { timeLeft, timeTaken } from '@/global_state/state'
 import { useStore } from 'vuex'
+import { axiosInstance } from '@/axiosConfig'
 
+const quizes = ref([])
 const route = useRoute()
 const store = useStore()
-const quizId = ref(parseInt(route.params.id))
-const quiz = quizes.find((q) => q.id === quizId.value)
+const quizId = ref(Number(route.params.id))
+const quiz = ref(null)
 const showResults = ref(false)
 const currentQuestionIndex = ref(0)
 const userAnswers = reactive([])
@@ -61,15 +65,37 @@ const answeredQuestions = reactive([])
 const numberOfCorrectAnswers = ref(0)
 let timerInterval = null
 const showConfirmationModal = ref(false)
+const isLoading = ref(true)
+const originalDuration = ref(0)
 
+const fetchQuizzes = async () => {
+  try {
+    const response = await axiosInstance.get('/quiz')
+    quizes.value = response.data
+    quiz.value = quizes.value.find((q) => q.id == quizId.value)
+    if (quiz.value) {
+      originalDuration.value = quiz.value.duration * 60
+      timeLeft.time = quiz.value.duration * 60 // Set initial time
+    }
+    isLoading.value = false
+  } catch (error) {
+    console.error('Error fetching quizzes:', error)
+    isLoading.value = false
+  }
+}
 
+onMounted(() => fetchQuizzes())
 
-const questionStatus = computed(() => `${currentQuestionIndex.value + 1}/${quiz.questions.length}`)
-const barPercentage = computed(() => `${(answeredQuestions.length / quiz.questions.length) * 100}%`)
+const questionStatus = computed(
+  () => `${currentQuestionIndex.value + 1}/${quiz.value.questions.length}`
+)
+const barPercentage = computed(
+  () => `${(answeredQuestions.length / quiz.value.questions.length) * 100}%`
+)
 
 const onOptionSelected = (isCorrect) => {
   userAnswers.push(
-    quiz.questions[currentQuestionIndex.value].options.find(
+    quiz.value.questions[currentQuestionIndex.value].options.find(
       (option) => option.isCorrect === isCorrect
     ).text
   )
@@ -81,7 +107,7 @@ const onOptionSelected = (isCorrect) => {
     answeredQuestions.push(currentQuestionIndex.value)
   }
 
-  if (quiz.questions.length - 1 === currentQuestionIndex.value) {
+  if (quiz.value.questions.length - 1 === currentQuestionIndex.value) {
     currentQuestionIndex.value -= 1
   }
 
@@ -96,16 +122,16 @@ const submitQuiz = async () => {
   // Collect quiz result data
   const quizResult = {
     date: new Date().toISOString(),
-    quizName: quiz.name,
-    timeTaken: timeTaken.time,
-    totalQuestions: quiz.questions.length,
+    quizName: quiz.value.name,
+    timeTaken: timeTaken.time / 60,
+    totalQuestions: quiz.value.questions.length,
     answeredQuestions: answeredQuestions.length,
     correctAnswers: numberOfCorrectAnswers.value,
     userId: store.getters.user._id
   }
 
   try {
-    const response = await this.$axios.post('/quiz/quiz-result', quizResult)
+    const response = await axiosInstance.post('/quiz/quiz-result', quizResult)
     console.log(response)
     // Optionally, store locally or in Vuex for immediate access
     // store.commit('addQuizResult', quizResult)
@@ -124,18 +150,17 @@ const restartQuiz = () => {
   numberOfCorrectAnswers.value = 0
   answeredQuestions.length = 0
   showResults.value = false
-  timeLeft.time = 120
+  timeLeft.time = originalDuration.value // Reset to original duration
   timeTaken.time = 0
 }
 
-// This lovely baby is who you call on to monitor reactive states
 watchEffect(() => {
-  if (quizId.value > 0 && !showResults.value) {
+  if (quiz.value && !showResults.value) {
     // Start the timer
     timerInterval = setInterval(() => {
       if (timeLeft.time > 0) {
-        timeLeft.time--
-        timeTaken.time++
+        timeLeft.time-- // Decrement seconds
+        timeTaken.time++ // Increment time taken
       } else {
         clearInterval(timerInterval)
         showResults.value = true
@@ -146,6 +171,7 @@ watchEffect(() => {
     clearInterval(timerInterval)
   }
 })
+
 onBeforeUnmount(() => {
   clearInterval(timerInterval)
 })
