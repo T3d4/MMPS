@@ -87,7 +87,7 @@ const signup = reactive({
   name: '',
   email: '',
   password: '',
-  faceDescriptor: null
+  faceDescriptors: []
 })
 
 const confirmPassword = reactive({
@@ -99,6 +99,7 @@ const faceCaptured = ref(false)
 const showModal = ref(false)
 
 const passwordsMatch = computed(() => signup.password === confirmPassword.confirmPwd)
+const isPasswordValid = computed(() => signup.password.length >= 8)
 
 const initFaceCapture = () => {
   showModal.value = true
@@ -108,7 +109,7 @@ const initFaceCapture = () => {
 }
 
 const handleFaceCaptured = (descriptor) => {
-  signup.faceDescriptor = descriptor
+  signup.faceDescriptors = descriptor
   faceCaptured.value = true
   showModal.value = false
   capturing.state = false
@@ -129,6 +130,11 @@ const closeModal = () => {
 }
 
 const signupUser = async () => {
+  if (!isPasswordValid.value) {
+    errorMessage.value = 'Password must be at least 8 characters long.'
+    return
+  }
+
   if (!passwordsMatch.value) {
     errorMessage.value = 'Passwords do not match.'
     return
@@ -144,7 +150,7 @@ const signupUser = async () => {
       name: signup.name,
       email: signup.email,
       password: signup.password,
-      faceDescriptor: signup.faceDescriptor
+      faceDescriptors: signup.faceDescriptors
     })
 
     if (response.data.success) {
@@ -154,7 +160,27 @@ const signupUser = async () => {
     }
   } catch (error) {
     console.error('Signup error:', error)
-    errorMessage.value = 'An error occurred during signup. Please try again.'
+
+    // Check for specific error responses from the server
+    if (error.response) {
+      switch (error.response.status) {
+        case 400: // Bad Request
+          errorMessage.value =
+            error.response.data.message || 'Invalid input. Please check your data.'
+          break
+        case 401: // Unauthorized
+          errorMessage.value =
+            error.response.data.message || 'Unauthorized. Please check your credentials.'
+          break
+        case 409: // Conflict
+          errorMessage.value = error.response.data.message || 'Email already exists.'
+          break
+        default:
+          errorMessage.value = 'An error occurred during signup. Please try again.'
+      }
+    } else {
+      errorMessage.value = 'Network error. Please check your connection and try again.'
+    }
   }
 }
 </script>

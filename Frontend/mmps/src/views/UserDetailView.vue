@@ -164,6 +164,7 @@ const updateUser = async () => {
       isAdmin: undefined
     })
     console.log('User updated successfully')
+    alert('User updated successfully')
   } catch (error) {
     console.error('Error updating user:', error)
   }
@@ -171,8 +172,10 @@ const updateUser = async () => {
 
 const deleteUser = async () => {
   try {
+    console.log(user.value.id)
     await axiosInstance.delete(`/users/${user.value.id}`)
     console.log('User deleted successfully')
+    alert('User deleted successfully')
   } catch (error) {
     console.error('Error deleting user:', error)
   }

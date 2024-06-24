@@ -12,10 +12,10 @@ const signup = async (email, password, name) => {
     return response.data
 }
 
-const validateFace = async (faceDescriptor, email) => {
+const validateFace = async (faceDescriptors, email) => {
     const response = await axiosInstance.post('/auth/validate-face', {
         email,
-        faceDescriptor
+        faceDescriptors
     })
     return response.data
 }
