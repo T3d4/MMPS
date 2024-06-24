@@ -1,21 +1,25 @@
+// CREATE QUIZ SCHEMA
 import Joi from "joi";
 
-// CREATE QUIZ SCHEMA
-export const createQuizSchema = Joi.array().items(Joi.object({
-    id: Joi.string().required(),
-    name: Joi.string().required(),
+// UPDATE QUIZ SCHEMA
+export const createQuizSchema = Joi.object({
+    id: Joi.number().required(),
+    name: Joi.string().optional(),
+    dateCreated: Joi.date().iso().required(),
+    duration: Joi.number().required(), // Assuming dateCreated is a ISO-formatted date string
     questions: Joi.array().items(
         Joi.object({
             id: Joi.number().required(),
-            text: Joi.string().required(),
+            text: Joi.string().optional(),
+            correctAnswer: Joi.string().required(),
             options: Joi.array().items(
                 Joi.object({
                     id: Joi.number().required(),
-                    label: Joi.string().required(),
-                    text: Joi.string().required(),
-                    isCorrect: Joi.boolean().required(), // Changed to boolean for clarity
+                    label: Joi.string().optional(),
+                    text: Joi.string().optional(),
+                    isCorrect: Joi.boolean().required()
                 })
-            ).min(2).required(), // Require at least two options per question
+            ).min(2).required(),
         })
-    ).min(1).required(), // Require at least one question in the quiz
-}));
+    ).optional(),
+}).min(1); // Ensure at least one field is being updated

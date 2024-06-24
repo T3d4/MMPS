@@ -8,16 +8,12 @@ export class QuizController {
         try {
             const quizData = req.body;
 
-            if (!Array.isArray(quizData)) {
-                return res.status(400).json({ message: "Invalid quiz data format. Expected an array." });
+            if (typeof quizData !== 'object' || Array.isArray(quizData)) {
+                return res.status(400).json({ message: "Invalid quiz data format. Expected an object." });
             }
 
-            const newQuizzes = await Promise.all(
-                quizData.map(async (quiz) => {
-                    return Quiz.create(quiz);
-                })
-            );
-            res.status(201).json({ message: "Quizzes created successfully", quizzes: newQuizzes });
+            const newQuiz = await Quiz.create(quizData);
+            res.status(201).json({ message: "Quiz created successfully", quiz: newQuiz });
         } catch (error) {
             next(error);
         }
@@ -97,5 +93,5 @@ export class QuizController {
         }
     }
 
-    
+
 }
