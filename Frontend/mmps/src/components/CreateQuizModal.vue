@@ -1,13 +1,15 @@
-<!-- src/components/CreateQuizModal.vue -->
 <template>
-  <div v-if="show" class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
+  <div
+    v-if="show"
+    class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50"
+  >
     <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-4xl text-gray-600">
       <h2 class="text-2xl text-gray-800 font-bold mb-4">Create New Quiz</h2>
       <form @submit.prevent="createQuiz">
         <div class="mb-4">
           <label class="block text-gray-700 font-semibold mb-2">Quiz Title:</label>
           <input
-            v-model="quiz.title"
+            v-model="quiz.name"
             type="text"
             class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
@@ -32,20 +34,25 @@
               placeholder="Enter question"
               required
             />
-            <div v-for="(answer, aIndex) in question.answers" :key="aIndex" class="flex items-center mt-2">
+            <div
+              v-for="(option, aIndex) in question.options"
+              :key="aIndex"
+              class="flex items-center mt-2"
+            >
               <input
-                v-model="answer.text"
+                v-model="option.text"
                 type="text"
                 class="flex-grow p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter answer"
                 required
               />
               <input
-                v-model="question.correctAnswerIndex"
-                :value="aIndex"
+                v-model="question.correctAnswer"
+                :value="option.text"
                 type="radio"
                 class="ml-2"
-                name="correctAnswer"
+                :name="'correctAnswer-' + qIndex"
+                @change="setCorrectAnswer(qIndex, aIndex)"
                 required
               />
             </div>
@@ -80,10 +87,7 @@
           >
             Cancel
           </button>
-          <button
-            type="submit"
-            class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700"
-          >
+          <button type="submit" class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700">
             Create
           </button>
         </div>
@@ -99,17 +103,18 @@ defineProps(['show'])
 const emit = defineEmits(['close', 'quizCreated'])
 
 const quiz = ref({
-  title: '',
+  name: '',
   duration: 0,
   questions: []
 })
 
 const addQuestion = () => {
-  quiz.value.questions.push({ text: '', answers: [], correctAnswerIndex: null })
+  quiz.value.questions.push({ text: '', options: [], correctAnswer: '' })
 }
 
 const addAnswer = (qIndex) => {
-  quiz.value.questions[qIndex].answers.push({ text: '' })
+  const optionId = quiz.value.questions[qIndex].options.length + 1
+  quiz.value.questions[qIndex].options.push({ id: optionId, text: '', isCorrect: false })
 }
 
 const removeQuestion = (qIndex) => {
@@ -120,19 +125,53 @@ const close = () => {
   emit('close')
 }
 
+const setCorrectAnswer = (qIndex, aIndex) => {
+  quiz.value.questions[qIndex].options.forEach((option, index) => {
+    option.isCorrect = index === aIndex
+  })
+}
+
 const createQuiz = () => {
-  const newQuiz = {
-    id: Math.random().toString(36).substr(2, 9),
-    title: quiz.value.title,
-    duration: quiz.value.duration,
-    dateCreated: new Date().toISOString(),
-    questions: quiz.value.questions
+  // Validate each question to ensure a correct answer is selected
+  const validQuiz = quiz.value.questions.every((question) => {
+    const correctOptions = question.options.filter((option) => option.isCorrect)
+    return correctOptions.length === 1 // Ensure exactly one correct option per question
+  })
+
+  if (!validQuiz) {
+    // If validation fails, show an alert to select a correct answer
+    alert('Please ensure each question has exactly one correct answer.')
+    return // Exit function if validation fails
   }
-  emit('quizCreated', newQuiz)
-  quiz.value.title = ''
-  quiz.value.duration = 0
-  quiz.value.questions = []
-  close()
+
+  // Proceed with quiz creation if validation passes
+  const questionsWithIds = quiz.value.questions.map((question, qIndex) => {
+    return {
+      id: qIndex + 1,
+      text: question.text,
+      options: question.options.map((option, oIndex) => ({
+        id: oIndex + 1,
+        label: String.fromCharCode(65 + oIndex), // A, B, C, D...
+        text: option.text,
+        isCorrect: option.isCorrect
+      })),
+      correctAnswer: question.options.find((option) => option.isCorrect)?.text || ''
+    }
+  })
+
+  const newQuiz = {
+    id: Math.floor(Math.random() * 10000), // Generate a random number for id
+    name: quiz.value.name,
+    dateCreated: new Date().toISOString(),
+    questions: questionsWithIds,
+    duration: quiz.value.duration
+  }
+
+  emit('quizCreated', newQuiz) // Emit event for quiz creation
+  quiz.value.name = '' // Reset quiz name
+  quiz.value.duration = 0 // Reset quiz duration
+  quiz.value.questions = [] // Clear quiz questions
+  close() // Close modal or form after quiz creation
 }
 </script>
 

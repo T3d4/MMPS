@@ -77,15 +77,28 @@ const closeCreateModal = () => {
   showCreateModal.value = false
 }
 
-const handleQuizCreated = (newQuiz) => {
-  quizzes.value.push(newQuiz)
-  showCreateModal.value = false
+const handleQuizCreated = async (newQuiz) => {
+  try {
+    console.log(newQuiz)
+    const response = await axiosInstance.post('/quiz', newQuiz)
+    if (response.data) {
+      // Assuming the API returns the created quiz
+      quizzes.value.push(response.data)
+      showCreateModal.value = false
+    } else {
+      console.error('Quiz creation response did not contain quiz data')
+    }
+  } catch (error) {
+    console.error('Error creating quiz:', error)
+    // Handle error (e.g., show error message to user)
+  }
 }
 
-// Computed property to filter quizzes based on search query
+// Computed property for filtered quizzes
 const filteredQuizzes = computed(() => {
-  return quizzes.value.filter((quiz) =>
-    quiz.name.toLowerCase().includes(searchQuery.value.toLowerCase())
+  const query = searchQuery.value.toLowerCase()
+  return quizzes.value.filter(
+    (quiz) => quiz.name && typeof quiz.name === 'string' && quiz.name.toLowerCase().includes(query)
   )
 })
 </script>
