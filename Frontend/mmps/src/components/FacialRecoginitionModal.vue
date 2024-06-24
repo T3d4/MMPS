@@ -118,9 +118,19 @@ const stopVideo = () => {
 const captureFace = async (maxRetries, retryInterval) => {
   let retryCount = 0
   let faceDescriptors = []
+  let intervalId
 
   return new Promise((resolve, reject) => {
-    const interval = setInterval(async () => {
+    intervalId = setInterval(async () => {
+      console.log(`Attempt ${retryCount + 1} of ${maxRetries}`)
+
+      if (!video.value || video.value.paused || video.value.ended) {
+        console.log('Video feed is not available')
+        clearInterval(intervalId)
+        reject(new Error('Video feed is not available'))
+        return
+      }
+
       try {
         const detection = await faceapi
           .detectSingleFace(video.value)
@@ -128,23 +138,28 @@ const captureFace = async (maxRetries, retryInterval) => {
           .withFaceDescriptor()
 
         if (detection) {
+          console.log('Face detected')
           const faceDescriptor = Array.from(detection.descriptor)
           faceDescriptors.push(faceDescriptor)
-          retryCount++
-
-          if (retryCount >= maxRetries) {
-            clearInterval(interval)
-            resolve(faceDescriptors)
-          }
         } else {
-          retryCount++
-          if (retryCount >= maxRetries) {
-            clearInterval(interval)
-            reject(new Error('Face capture failed after multiple attempts.'))
+          console.log('No face detected in this attempt')
+        }
+
+        retryCount++
+
+        if (retryCount >= maxRetries) {
+          clearInterval(intervalId)
+          if (faceDescriptors.length > 0) {
+            console.log(`Face capture completed with ${faceDescriptors.length} descriptors`)
+            resolve(faceDescriptors)
+          } else {
+            console.log('Face capture failed: No faces detected')
+            reject(new Error('Face capture failed: No faces detected'))
           }
         }
       } catch (error) {
-        clearInterval(interval)
+        console.error('Error during face detection:', error)
+        clearInterval(intervalId)
         reject(error)
       }
     }, retryInterval)
@@ -152,28 +167,34 @@ const captureFace = async (maxRetries, retryInterval) => {
 }
 
 const captureAndVerifyFace = async () => {
-  faceCaptureTimeout = setTimeout(() => {
-    if (!faceCaptured.value) {
-      clearInterval(faceCaptureInterval)
-      showCamera.state = false
-      stopVideo()
-      emit('notCaptured')
-    }
-  }, 10000)
-
-  const maxRetries = 6
-  const retryInterval = 850
+  let faceCaptureTimeout
 
   try {
+    faceCaptureTimeout = setTimeout(() => {
+      if (!faceCaptured.value) {
+        console.log('Face capture timeout')
+        showCamera.state = false
+        stopVideo()
+        emit('notCaptured')
+      }
+    }, 15000)
+
+    const maxRetries = 6
+    const retryInterval = 850
+    console.log('Starting face capture')
     const faceDescriptors = await captureFace(maxRetries, retryInterval)
 
-    // Compute average descriptor
+    if (faceDescriptors.length === 0) {
+      throw new Error('No face descriptors captured')
+    }
+
+    console.log('Computing average descriptor')
     const avgDescriptor = faceDescriptors[0].map(
       (_, i) => faceDescriptors.reduce((sum, desc) => sum + desc[i], 0) / faceDescriptors.length
     )
 
     if (props.mode === 'signup') {
-      // Emit averaged face descriptor for signup
+      console.log('Signup mode: Emitting face descriptor')
       faceCaptured.value = true
       faceVerified.value = true
       showCamera.state = false
@@ -181,25 +202,29 @@ const captureAndVerifyFace = async () => {
       emit('faceDescriptor', avgDescriptor)
       emit('verified')
     } else if (props.mode === 'quiz') {
-      console.log(avgDescriptor, user.value.email)
-
+      console.log('Quiz mode: Validating face')
       const response = await authService.validateFace(avgDescriptor, user.value.email)
-
-      if (response.success) {
+      console.log(response)
+      if (response.status == 'success') {
+        console.log('Face verified successfully')
         faceCaptured.value = true
         faceVerified.value = true
         showCamera.state = false
         stopVideo()
         emit('verified')
       } else {
-        errorMessage.value = response.data.message
+        console.log('Face verification failed')
+        errorMessage.value = 'Face verification failed'
       }
     }
   } catch (error) {
-    console.error(error)
-    clearInterval(faceCaptureInterval)
+    console.error('Error in captureAndVerifyFace:', error)
     faceAuthLoading.value = false
-    errorMessage.value = error.response.data.message
+    errorMessage.value = error.message || 'An error occurred during face capture and verification'
+  } finally {
+    clearTimeout(faceCaptureTimeout)
+    showCamera.state = false
+    stopVideo()
   }
 }
 
