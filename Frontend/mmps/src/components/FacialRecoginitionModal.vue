@@ -1,11 +1,26 @@
 <template>
-  <div v-if="show" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+  <div
+    v-if="show"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+  >
     <div class="bg-white w-[400px] rounded-lg p-8 shadow-md relative">
       <h2 class="text-2xl font-semibold mb-4 text-gray-700">Facial Recognition</h2>
 
-      <div class="relative w-[300px] mx-auto rounded-md border-[3px] border-indigo-500 shadow-md h-[227px] flex items-center justify-center">
-        <video ref="video" v-show="!isVideoLoading" class="w-full h-full" autoplay playsinline muted></video>
-        <div v-if="isVideoLoading" class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75">
+      <div
+        class="relative w-[300px] mx-auto rounded-md border-[3px] border-indigo-500 shadow-md h-[227px] flex items-center justify-center"
+      >
+        <video
+          ref="video"
+          v-show="!isVideoLoading"
+          class="w-full h-full"
+          autoplay
+          playsinline
+          muted
+        ></video>
+        <div
+          v-if="isVideoLoading"
+          class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75"
+        >
           <div class="spinner"></div>
         </div>
       </div>
@@ -21,7 +36,10 @@
       </p>
 
       <div class="flex justify-center gap-4 mt-4">
-        <button @click="closeModal" class="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400 text-gray-700 disabled:cursor-not-allowed disabled:opacity-60">
+        <button
+          @click="closeModal"
+          class="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400 text-gray-700 disabled:cursor-not-allowed disabled:opacity-60"
+        >
           Cancel
         </button>
       </div>
@@ -51,7 +69,6 @@ const props = defineProps({
     required: false
   }
 })
-const quizId = props.quizId
 const emit = defineEmits(['close', 'verified', 'notCaptured', 'faceDescriptor'])
 
 const faceDetected = ref(false)
@@ -98,6 +115,42 @@ const stopVideo = () => {
   }
 }
 
+const captureFace = async (maxRetries, retryInterval) => {
+  let retryCount = 0
+  let faceDescriptors = []
+
+  return new Promise((resolve, reject) => {
+    const interval = setInterval(async () => {
+      try {
+        const detection = await faceapi
+          .detectSingleFace(video.value)
+          .withFaceLandmarks()
+          .withFaceDescriptor()
+
+        if (detection) {
+          const faceDescriptor = Array.from(detection.descriptor)
+          faceDescriptors.push(faceDescriptor)
+          retryCount++
+
+          if (retryCount >= maxRetries) {
+            clearInterval(interval)
+            resolve(faceDescriptors)
+          }
+        } else {
+          retryCount++
+          if (retryCount >= maxRetries) {
+            clearInterval(interval)
+            reject(new Error('Face capture failed after multiple attempts.'))
+          }
+        }
+      } catch (error) {
+        clearInterval(interval)
+        reject(error)
+      }
+    }, retryInterval)
+  })
+}
+
 const captureAndVerifyFace = async () => {
   faceCaptureTimeout = setTimeout(() => {
     if (!faceCaptured.value) {
@@ -105,53 +158,49 @@ const captureAndVerifyFace = async () => {
       showCamera.state = false
       stopVideo()
       emit('notCaptured')
-      errorMessage.value = 'An error occurred during face verification.'
     }
   }, 10000)
 
-  faceCaptureInterval = setInterval(async () => {
-    try {
-      const detection = await faceapi
-        .detectSingleFace(video.value)
-        .withFaceLandmarks()
-        .withFaceDescriptor()
+  const maxRetries = 6
+  const retryInterval = 850
 
-      if (detection) {
-        const faceDescriptor = Array.from(detection.descriptor)
-        clearTimeout(faceCaptureTimeout)
-        clearInterval(faceCaptureInterval)
-        faceAuthLoading.value = false
+  try {
+    const faceDescriptors = await captureFace(maxRetries, retryInterval)
+
+    // Compute average descriptor
+    const avgDescriptor = faceDescriptors[0].map(
+      (_, i) => faceDescriptors.reduce((sum, desc) => sum + desc[i], 0) / faceDescriptors.length
+    )
+
+    if (props.mode === 'signup') {
+      // Emit averaged face descriptor for signup
+      faceCaptured.value = true
+      faceVerified.value = true
+      showCamera.state = false
+      stopVideo()
+      emit('faceDescriptor', avgDescriptor)
+      emit('verified')
+    } else if (props.mode === 'quiz') {
+      console.log(avgDescriptor, user.value.email)
+
+      const response = await authService.validateFace(avgDescriptor, user.value.email)
+
+      if (response.success) {
         faceCaptured.value = true
-
-        if (props.mode === 'signup') {
-          // Emit face descriptor for signup
-          faceCaptured.value = true
-          faceVerified.value = true
-          showCamera.state = false
-          stopVideo()
-          emit('faceDescriptor', faceDescriptor)
-          emit('verified')
-        } else if (props.mode === 'quiz') {
-          console.log(faceDescriptor, user.value.email)
-
-          const response = await authService.validateFace(faceDescriptor, user.value.email)
-
-          if (response.success) {
-            faceCaptured.value = true
-            faceVerified.value = true
-            showCamera.state = false
-            stopVideo()
-            emit('verified')
-          } else {
-            errorMessage.value = response.data.message
-          }
-        }
+        faceVerified.value = true
+        showCamera.state = false
+        stopVideo()
+        emit('verified')
+      } else {
+        errorMessage.value = response.data.message
       }
-    } catch (error) {
-      console.error(error)
-      errorMessage.value = 'An error occurred during face verification.'
     }
-  }, 500)
+  } catch (error) {
+    console.error(error)
+    clearInterval(faceCaptureInterval)
+    faceAuthLoading.value = false
+    errorMessage.value = error.response.data.message
+  }
 }
 
 watch(showCamera, async (newShowCamera) => {
