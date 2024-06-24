@@ -11,7 +11,7 @@ export interface IUser {
     refreshToken?: string;
     accessToken?: string;
     isAdmin?: boolean;
-    faceDescriptor?: Array<any>;
+    faceDescriptors?: Array<Array<number>>;
 }
 
 export interface IUserDocument extends IUser, Document {

@@ -26,10 +26,7 @@ const userSchema = new Schema<IUserDocument>({
     accessToken: {
         type: String
     },
-    faceDescriptor: {
-        type: [Object],
-        required: true
-    }
+    faceDescriptors: { type: [[Number]], default: [] },
 });
 
 // Virtual for 'id' field
