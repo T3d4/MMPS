@@ -103,11 +103,6 @@ export class UserController {
         try {
             const userId = req.params.id;
 
-            // Check authorization (admin only)
-            if (!req.user.isAdmin) {
-                return res.status(403).json({ message: "Unauthorized" });
-            }
-
             const deletedUser = await User.findByIdAndDelete(userId);
 
             if (!deletedUser) {
