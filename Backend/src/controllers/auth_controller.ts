@@ -23,14 +23,25 @@ const refreshCookieConfig: object = {
     sameSite: "none",
 };
 
+
+
 export class AuthController {
 
     public async signup(req: Request, res: Response, next: NextFunction) {
-        const { name, email, password, faceDescriptor } = req.body;
+        const expectedDescriptorLength = 128;
+        const { name, email, password, faceDescriptors } = req.body;
 
         try {
-            if (!name || !email || !password || !faceDescriptor) {
+            if (!name || !email || !password || !faceDescriptors) {
                 return res.status(400).json({ message: "All fields are required." });
+            }
+
+            if (password.length < 8) {
+                return res.status(400).json({ message: "Password must be at least 8 characters long." });
+            }
+
+            if (faceDescriptors.length !== expectedDescriptorLength) {
+                return res.status(400).json({ message: "Face descriptor length mismatch. Please try again." });
             }
 
             // Check if a user with the same email already exists
@@ -42,12 +53,16 @@ export class AuthController {
             // Check for unique face descriptor
             const users = await User.find({});
             for (const user of users) {
+                if (!user.faceDescriptors || user.faceDescriptors.length !== faceDescriptors.length) {
+                    continue; // Skip users with mismatched descriptor lengths or missing face descriptors
+                }
+
                 const labeledFaceDescriptors = new faceapi.LabeledFaceDescriptors(
                     user.email,
-                    [Float32Array.from(user.faceDescriptor)]
+                    user.faceDescriptors.map(descriptor => Float32Array.from(descriptor))
                 );
                 const faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors, 0.6);
-                const bestMatch = faceMatcher.findBestMatch(new Float32Array(faceDescriptor));
+                const bestMatch = faceMatcher.findBestMatch(new Float32Array(faceDescriptors));
                 if (bestMatch.distance < 0.6) {
                     return res.status(400).json({ message: "Face descriptor already exists for another user." });
                 }
@@ -61,22 +76,10 @@ export class AuthController {
                 email: email,
                 isAdmin: req.body.isAdmin || false, // Set isAdmin to false if not provided
                 hash: hashedPassword,
-                faceDescriptor: faceDescriptor
+                faceDescriptors: faceDescriptors
             };
 
             const user = await User.create(newUser);
-
-
-            // Update the user document with the new refresh token
-            // newUser.refreshToken = refreshToken;
-            // await newUser.save();
-
-            // res.cookie("refreshToken", refreshToken, {
-            //     httpOnly: true,
-            //     maxAge: 72 * 60 * 60 * 1000,
-            //     secure: true,
-            //     sameSite: "none",
-            // });
 
             const sanitizedUser = {
                 ...user.toObject(),
@@ -84,8 +87,6 @@ export class AuthController {
                 refreshToken: undefined,
                 otpExpiresBy: undefined,
             };
-
-            // res.setHeader('Authorization', `Bearer ${accessToken}`);
 
             return res.status(201).json({
                 message: "Signup Successful",
@@ -235,41 +236,68 @@ export class AuthController {
 
     public async validateFace(req: Request, res: Response, next: NextFunction) {
         try {
-            const { email, faceDescriptor } = req.body;
+            const { email, faceDescriptors } = req.body;
 
-            if (!email || !faceDescriptor) {
-                return res.status(400).json({ message: "Email and face descriptor are required." });
+            // Function to compute Euclidean distance between two descriptors
+            function computeFaceDistance(descriptor1: number[], descriptor2: number[]): number {
+                if (descriptor1.length !== descriptor2.length) {
+                    throw new Error('Descriptor lengths do not match');
+                }
+
+                // Compute Euclidean distance between two descriptors
+                const squaredDifferenceSum = descriptor1.reduce((acc, val, idx) => {
+                    return acc + Math.pow(val - descriptor2[idx], 2);
+                }, 0);
+
+                return Math.sqrt(squaredDifferenceSum);
             }
 
+            // Log email and faceDescriptors for debugging
+            console.log('Email:', email);
+            console.log('Face Descriptors:', faceDescriptors);
+
+            // Find the user by email
             const user = await User.findOne({ email });
-            if (!user || !user.faceDescriptor) {
-                return res.status(404).json({ message: "User not found or face descriptor missing" });
+
+            // Check if the user exists
+            if (!user) {
+                return res.status(404).json({ message: "User not found", email });
             }
 
-            // Load models (only once, potentially on server startup)
-            // await faceapi.nets.ssdMobilenetv1.loadFromDisk(path.join(__dirname, '../public/models'));
-            // await faceapi.nets.faceLandmark68Net.loadFromDisk(path.join(__dirname, '../public/models'));
-            // await faceapi.nets.faceRecognitionNet.loadFromDisk(path.join(__dirname, '../public/models'));
+            // Check if face descriptors are missing or empty
+            if (!user.faceDescriptors || user.faceDescriptors.length === 0) {
+                return res.status(404).json({ message: "Face descriptors missing for the user", email });
+            }
 
-            // Create LabeledFaceDescriptors and FaceMatcher
-            const labeledFaceDescriptors = new faceapi.LabeledFaceDescriptors(
-                user.email,
-                [Float32Array.from(user.faceDescriptor)]
-            );
-            const faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors, 0.6);
+            // Define a face match threshold (adjust as per your application's needs)
+            const faceMatchThreshold = 0.6;
 
-            // Compare the descriptors
-            const bestMatch = faceMatcher.findBestMatch(new Float32Array(faceDescriptor));
+            // Check if any of the stored face descriptors match with the provided descriptors
+            const isFaceMatched = user.faceDescriptors.some(storedDescriptor => {
+                // Compare each stored descriptor with each provided descriptor
+                return faceDescriptors.some(providedDescriptor => {
+                    try {
+                        const distance = computeFaceDistance(storedDescriptor, providedDescriptor);
+                        return distance < faceMatchThreshold;
+                    } catch (error) {
+                        console.error('Error comparing descriptors:', error);
+                        return false; // Return false if comparison fails
+                    }
+                });
+            });
 
-            if (bestMatch.distance < 0.6) {
+            // If a match is found, return success
+            if (isFaceMatched) {
                 return res.status(200).json({ success: true, message: 'Face validated successfully', user });
             }
 
+            // If no match is found, return failure
             return res.status(401).json({ success: false, message: 'Face not recognized' });
 
         } catch (error) {
-            next(error);
+            next(error); // Forward any errors to the error handling middleware
         }
-
     }
+
+
 }

@@ -6,5 +6,5 @@ export const signupSchema = Joi.object({
     email: Joi.string().email().required(),
     password: Joi.string().min(8).required(),
     isAdmin: Joi.boolean().default(false),
-    faceDescriptor: Joi.any().required(),
+    faceDescriptors: Joi.any().required(),
 });

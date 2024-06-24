@@ -99,10 +99,10 @@ export class UserController {
         }
     }
 
-    public async deleteUser(req: RequestWithUser, res: Response, next: NextFunction) {
+    public async deleteUser(req: Request, res: Response, next: NextFunction) {
         try {
             const userId = req.params.id;
-
+            console.log(req.params)
             const deletedUser = await User.findByIdAndDelete(userId);
 
             if (!deletedUser) {

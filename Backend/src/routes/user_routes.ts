@@ -3,7 +3,6 @@ import { Router } from "express";
 import { UserController } from "../controllers";
 import {
     updateUserSchema,
-    deleteUserSchema
 } from "../validators";
 import { validator, authenticateToken, isAdmin } from "../middlewares";
 
@@ -34,6 +33,5 @@ userRouter.patch(
 // DELETE - Delete a user by ID (Admin only)
 userRouter.delete(
     "/:id",
-    validator(deleteUserSchema),
     deleteUser
 );
