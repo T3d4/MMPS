@@ -19,11 +19,13 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { currentTabState } from '@/global_state/state'
+import { computed, onMounted } from 'vue'
 import { useStore } from 'vuex'
 
 const store = useStore()
 const isAdmin = computed(() => store.getters.isAdmin)
+onMounted(() => (currentTabState.value = 'details'))
 </script>
 
 <style scoped>
