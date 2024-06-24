@@ -45,20 +45,53 @@
 
         <!-- Right Content Section -->
         <div
-          class="min-w-[400px] w-[600px] max-h-[60dvh] lg:w-1/2 p-10 bg-white shadow-md rounded-r-lg overflow-y-auto"
+          class="min-w-fit w-[600px] max-h-[60dvh] lg:w-1/2 p-4 bg-white shadow-md rounded-r-lg overflow-y-auto"
         >
-          <div v-if="currentTab === 'details'">
-            <h2 class="text-3xl font-bold mb-6 text-gray-800">{{ user.name }}</h2>
-            <!-- <p class="text-gray-600">{{ user.role }}</p> -->
-            <h3 class="text-xl text-gray-600 font-bold mb-2">Scores of Previous Quizzes</h3>
-            <ul class="mb-4">
-              <li v-for="(quiz, index) in user.quizzes" :key="index" class="text-gray-600">
-                {{ quiz.quizName }}: {{ quiz.correctAnswers }} / {{ quiz.totalQuestions }} -
-                <span class="text-gray-400">
-                  {{ formatDate(quiz.date) }}
-                </span>
-              </li>
-            </ul>
+          <div v-if="currentTab === 'details'" class="text-white p-5 h-full w-full">
+            <h2 class="text-2xl text-gray-800 font-bold mb-3">{{ user.name }}</h2>
+            <h3 class="text-xl mb-4 text-gray-600">Scores of Previous Quizzes</h3>
+            <div class="overflow-x-auto">
+              <table class="w-full mb-4 bg-gray-800 rounded-lg overflow-y-auto">
+                <thead class="bg-gray-700">
+                  <tr>
+                    <th
+                      class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
+                    >
+                      Quiz Name
+                    </th>
+                    <th
+                      class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
+                    >
+                      Score
+                    </th>
+                    <th
+                      class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
+                    >
+                      Obtainable Score
+                    </th>
+                    <th
+                      class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
+                    >
+                      Date
+                    </th>
+                    <th
+                      class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
+                    >
+                      Time
+                    </th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-700">
+                  <tr v-for="quiz in user.quizzes" :key="quiz.date" class="hover:bg-gray-700">
+                    <td class="px-4 py-3 whitespace-nowrap">{{ quiz.quizName }}</td>
+                    <td class="px-4 py-3 whitespace-nowrap">{{ quiz.correctAnswers }}</td>
+                    <td class="px-4 py-3 whitespace-nowrap">{{ quiz.totalQuestions }}</td>
+                    <td class="px-4 py-3 whitespace-nowrap">{{ formatDate(quiz.date) }}</td>
+                    <td class="px-4 py-3 whitespace-nowrap">{{ formatTime(quiz.date) }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
 
           <div v-else-if="currentTab === 'update'" class="text-gray-600">
@@ -187,12 +220,14 @@ const formatDate = (dateString) => {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit'
+    day: 'numeric'
   }
   return new Date(dateString).toLocaleDateString(undefined, options)
+}
+
+const formatTime = (dateString) => {
+  const options = { hour: '2-digit', minute: '2-digit' }
+  return new Date(dateString).toLocaleTimeString('en-UK', options)
 }
 </script>
 
