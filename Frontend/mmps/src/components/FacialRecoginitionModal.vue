@@ -158,7 +158,6 @@ const captureAndVerifyFace = async () => {
       showCamera.state = false
       stopVideo()
       emit('notCaptured')
-      errorMessage.value = 'An error occurred during face verification.'
     }
   }, 10000)
 
@@ -200,7 +199,7 @@ const captureAndVerifyFace = async () => {
     console.error(error)
     clearInterval(faceCaptureInterval)
     faceAuthLoading.value = false
-    errorMessage.value = error.data.response.message
+    errorMessage.value = error.response.data.message
   }
 }
 
