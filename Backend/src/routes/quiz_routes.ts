@@ -4,7 +4,6 @@ import { QuizController, QuizResultController } from "../controllers";
 import {
     createQuizSchema,
     updateQuizSchema,
-    deleteQuizSchema
 } from "../validators";
 import { validator, authenticateToken, isAdmin } from "../middlewares";
 
@@ -40,7 +39,6 @@ quizRouter.patch(
 // DELETE - Delete a quiz by ID (Admin only)
 quizRouter.delete(
     "/:id",
-    validator(deleteQuizSchema),
     deleteQuiz
 );
 
