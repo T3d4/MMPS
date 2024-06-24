@@ -256,12 +256,12 @@ export class AuthController {
                 user.email,
                 [Float32Array.from(user.faceDescriptor)]
             );
-            const faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors, 0.7);
+            const faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors, 0.4);
 
             // Compare the descriptors
             const bestMatch = faceMatcher.findBestMatch(new Float32Array(faceDescriptor));
 
-            if (bestMatch.distance < 0.7) {
+            if (bestMatch.distance < 0.4) {
                 return res.status(200).json({ success: true, message: 'Face validated successfully', user });
             }
 
