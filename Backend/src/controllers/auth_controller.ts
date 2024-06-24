@@ -46,9 +46,9 @@ export class AuthController {
                     user.email,
                     [Float32Array.from(user.faceDescriptor)]
                 );
-                const faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors, 0.4);
+                const faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors, 0.6);
                 const bestMatch = faceMatcher.findBestMatch(new Float32Array(faceDescriptor));
-                if (bestMatch.distance < 0.4) {
+                if (bestMatch.distance < 0.6) {
                     return res.status(400).json({ message: "Face descriptor already exists for another user." });
                 }
             }
@@ -256,12 +256,12 @@ export class AuthController {
                 user.email,
                 [Float32Array.from(user.faceDescriptor)]
             );
-            const faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors, 0.4);
+            const faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors, 0.6);
 
             // Compare the descriptors
             const bestMatch = faceMatcher.findBestMatch(new Float32Array(faceDescriptor));
 
-            if (bestMatch.distance < 0.4) {
+            if (bestMatch.distance < 0.6) {
                 return res.status(200).json({ success: true, message: 'Face validated successfully', user });
             }
 
