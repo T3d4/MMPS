@@ -238,23 +238,9 @@ export class AuthController {
         try {
             const { email, faceDescriptors } = req.body;
 
-            // Function to compute Euclidean distance between two descriptors
-            function computeFaceDistance(descriptor1: number[], descriptor2: number[]): number {
-                if (descriptor1.length !== descriptor2.length) {
-                    throw new Error('Descriptor lengths do not match');
-                }
-
-                // Compute Euclidean distance between two descriptors
-                const squaredDifferenceSum = descriptor1.reduce((acc, val, idx) => {
-                    return acc + Math.pow(val - descriptor2[idx], 2);
-                }, 0);
-
-                return Math.sqrt(squaredDifferenceSum);
-            }
-
-            // Log email and faceDescriptors for debugging
+            // Log input for debugging
             console.log('Email:', email);
-            console.log('Face Descriptors:', faceDescriptors);
+            console.log('Received Face Descriptors:', faceDescriptors);
 
             // Find the user by email
             const user = await User.findOne({ email });
@@ -264,40 +250,48 @@ export class AuthController {
                 return res.status(404).json({ message: "User not found", email });
             }
 
-            // Check if face descriptors are missing or empty
-            if (!user.faceDescriptors || user.faceDescriptors.length === 0) {
-                return res.status(404).json({ message: "Face descriptors missing for the user", email });
+            // Ensure faceDescriptors is an array of arrays
+            const normalizedFaceDescriptors = Array.isArray(faceDescriptors[0]) ? faceDescriptors : [faceDescriptors];
+
+            // Check descriptor length
+            if (normalizedFaceDescriptors[0].length !== user.faceDescriptors[0].length) {
+                return res.status(400).json({ message: "Face descriptor length mismatch" });
             }
 
-            // Define a face match threshold (adjust as per your application's needs)
-            const faceMatchThreshold = 0.6;
+            // Define a face match threshold (adjust as needed)
+            const faceMatchThreshold = 0.3;
 
-            // Check if any of the stored face descriptors match with the provided descriptors
-            const isFaceMatched = user.faceDescriptors.some(storedDescriptor => {
-                // Compare each stored descriptor with each provided descriptor
-                return faceDescriptors.some(providedDescriptor => {
-                    try {
-                        const distance = computeFaceDistance(storedDescriptor, providedDescriptor);
-                        return distance < faceMatchThreshold;
-                    } catch (error) {
-                        console.error('Error comparing descriptors:', error);
-                        return false; // Return false if comparison fails
-                    }
-                });
+            // Create LabeledFaceDescriptors for the user
+            const labeledFaceDescriptors = new faceapi.LabeledFaceDescriptors(
+                user.email,
+                user.faceDescriptors.map(descriptor => Float32Array.from(descriptor))
+            );
+
+            // Create a FaceMatcher
+            const faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors, faceMatchThreshold);
+
+            // Check if any of the provided descriptors match with the stored descriptors
+            const matchResults = normalizedFaceDescriptors.map(providedDescriptor => {
+                const bestMatch = faceMatcher.findBestMatch(Float32Array.from(providedDescriptor));
+                console.log('Best match distance:', bestMatch.distance);
+                return bestMatch.distance < faceMatchThreshold;
             });
-
-            // If a match is found, return success
-            if (isFaceMatched) {
-                return res.status(200).json({ success: true, message: 'Face validated successfully', user });
+            console.log(matchResults)
+            if (matchResults[0]) {
+                return res.status(200).json({
+                    status: "success",
+                    matchResults
+                });
+            } else {
+                return res.status(401).json({ status: "face mismatch" })
             }
 
-            // If no match is found, return failure
-            return res.status(401).json({ success: false, message: 'Face not recognized' });
 
+            // ... (rest of the code remains the same)
         } catch (error) {
-            next(error); // Forward any errors to the error handling middleware
+            console.error('Error in validateFace:', error);
+            next(error);
         }
     }
-
 
 }
