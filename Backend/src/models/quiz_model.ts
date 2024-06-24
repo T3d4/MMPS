@@ -20,13 +20,24 @@ const quizSchema = new Schema<IQuiz>(
                 id: { type: Number },
                 label: { type: String },
                 text: { type: String },
-                isCorrect: { type: String }
-            }]
+                isCorrect: { type: Boolean }
+            }],
+            correctAnswer: { type: String }
         }],
+        duration: {
+            type: Number,
+            required: true
+        },
+        dateCreated: {
+            type: Date,
+            default: Date.now,
+            required: true
+        }
     },
     {
         timestamps: true,
     }
 );
+
 
 export const Quiz = model<IQuiz>("quiz", quizSchema);
