@@ -32,7 +32,8 @@ const quizSchema = new Schema<IQuiz>(
             type: Date,
             default: Date.now,
             required: true
-        }
+        },
+        taken: [{ type: Schema.Types.ObjectId, ref: 'User' }],
     },
     {
         timestamps: true,

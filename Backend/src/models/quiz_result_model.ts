@@ -22,7 +22,7 @@ const quizResultSchema: Schema = new Schema({
     timeTaken: { type: Number, required: true },
     totalQuestions: { type: Number, required: true },
     answeredQuestions: { type: Number, required: true },
-    correctAnswers: { type: Number, required: true }
+    correctAnswers: { type: Number, required: true },
 });
 
-export default mongoose.model<QuizResult>('QuizResult', quizResultSchema);
+export const QuizResult = mongoose.model<QuizResult>('QuizResult', quizResultSchema);
