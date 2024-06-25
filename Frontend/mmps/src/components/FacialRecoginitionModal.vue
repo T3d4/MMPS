@@ -49,7 +49,7 @@
 
 <script setup>
 import { ref, watch, onBeforeUnmount, computed } from 'vue'
-import { showCamera, cancelLoading } from '@/global_state/state'
+import { showCamera, cancelLoading, verified } from '@/global_state/state'
 import * as faceapi from 'face-api.js'
 import { useStore } from 'vuex'
 import authService from '@/services/authService'
@@ -207,6 +207,7 @@ const captureAndVerifyFace = async () => {
       console.log(response)
       if (response.status == 'success') {
         console.log('Face verified successfully')
+        verified.value = true
         faceCaptured.value = true
         faceVerified.value = true
         showCamera.state = false

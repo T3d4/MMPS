@@ -8,7 +8,8 @@ const store = createStore({
         return {
             user: null,
             isAdmin: null,
-            token: null
+            token: null,
+            verified:false,
         }
     },
     mutations: {
@@ -21,6 +22,7 @@ const store = createStore({
             state.user = null
             state.isAdmin = null
             state.token = null
+            state.verified = null
         }
     },
     getters: {
@@ -35,6 +37,9 @@ const store = createStore({
         },
         token(state){
             return state.token
+        },
+        isVerified(state){
+            return state.verified
         }
     },
     actions: {

@@ -30,8 +30,9 @@ import router from '@/router'
 import Card from '@/components/QuizCard.vue'
 import FacialRecognitionModal from '@/components/FacialRecoginitionModal.vue'
 import QuizzesHeader from '@/components/QuizzesHeader.vue'
-import { capturing, showCamera, cancelLoading, view, timeLeft } from '@/global_state/state'
+import { capturing, showCamera, cancelLoading, view, timeLeft, verified } from '@/global_state/state'
 import { axiosInstance } from '@/axiosConfig'
+import store from '@/store/store'
 
 const showModal = ref(false)
 const quizId = ref(null)
@@ -47,7 +48,13 @@ onMounted(() => {
 
 const fetchQuizzes = async () => {
   const response = await axiosInstance.get('/quiz')
-  quizData.value = response.data
+  const quizzes = response.data
+  const userId = store.getters.user._id
+  quizzes.forEach((quiz) => {
+    quiz.taken = quiz.taken.includes(userId)
+  })
+
+  quizData.value = quizzes
 }
 // TODO
 const onSelectQuiz = (quiz, time) => {
@@ -68,8 +75,10 @@ const closeModal = () => {
 // Function to handle the "verified" event from the modal
 const handleFaceVerified = () => {
   showModal.value = false
+  verified.value = true
   capturing.state = false
   showCamera.state = false
+  console.log("got here", quizId.value)
   router.push(`/quiz/${quizId.value}`)
 }
 </script>
