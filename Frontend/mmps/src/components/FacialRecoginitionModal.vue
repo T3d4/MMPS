@@ -31,7 +31,7 @@
         <p v-else class="text-gray-900 ml-2">Capturing...</p>
       </div>
 
-      <p v-if="!faceDetected && !faceAuthLoading" class="text-red-500 mt-2 pl-6">
+      <p v-if="errorMessage && !faceAuthLoading" class="text-red-500 mt-2 pl-6">
         {{ errorMessage }}
       </p>
 
@@ -71,7 +71,6 @@ const props = defineProps({
 })
 const emit = defineEmits(['close', 'verified', 'notCaptured', 'faceDescriptor'])
 
-const faceDetected = ref(false)
 const faceVerified = ref(false)
 const video = ref(null)
 const faceAuthLoading = ref(false)
@@ -88,31 +87,42 @@ const loadModels = async () => {
 }
 
 const startVideo = async () => {
-  if (cancelLoading.value) return // If cancel is clicked, stop further processing
+  if (cancelLoading.value) return
   const constraints = { audio: false, video: true }
   try {
     const stream = await navigator.mediaDevices.getUserMedia(constraints)
-    video.value.srcObject = stream
-    isVideoLoading.value = false // Video has started loading
+    if (video.value) {
+      video.value.srcObject = stream
+      return new Promise((resolve) => {
+        video.value.onloadedmetadata = () => {
+          isVideoLoading.value = false
+          resolve()
+        }
+      })
+    } else {
+      throw new Error('Video element not found')
+    }
   } catch (error) {
     console.error('Error accessing camera:', error)
-    isVideoLoading.value = false // Handle the error by marking loading as false
+    isVideoLoading.value = false
+    errorMessage.value =
+      'Unable to access camera. Please check your camera permissions and try again.'
+    throw error
   }
 }
-
-watch(cancelLoading, (newCancelLoading) => {
-  if (!newCancelLoading.state) {
-    stopVideo()
-  }
-})
 
 const stopVideo = () => {
   if (video.value && video.value.srcObject) {
     const stream = video.value.srcObject
     const tracks = stream.getTracks()
-    tracks.forEach((track) => track.stop())
+    tracks.forEach((track) => {
+      track.stop()
+      stream.removeTrack(track)
+    })
     video.value.srcObject = null
   }
+  isVideoLoading.value = true
+  faceAuthLoading.value = false
 }
 
 const captureFace = async (maxRetries, retryInterval) => {
@@ -167,83 +177,112 @@ const captureFace = async (maxRetries, retryInterval) => {
 }
 
 const captureAndVerifyFace = async () => {
-  let faceCaptureTimeout
+  let retryCount = 0
+  const maxRetries = 3
 
-  try {
-    faceCaptureTimeout = setTimeout(() => {
-      if (!faceCaptured.value) {
-        console.log('Face capture timeout')
-        showCamera.state = false
-        stopVideo()
-        emit('notCaptured')
+  while (retryCount < maxRetries) {
+    try {
+      faceAuthLoading.value = true
+      if (!video.value || !video.value.srcObject || video.value.paused || video.value.ended) {
+        console.log('Video stream not available or ended, attempting to restart')
+        await startVideo()
       }
-    }, 15000)
 
-    const maxRetries = 6
-    const retryInterval = 850
-    console.log('Starting face capture')
-    const faceDescriptors = await captureFace(maxRetries, retryInterval)
+      let faceCaptureTimeout = setTimeout(() => {
+        if (!faceCaptured.value) {
+          console.log('Face capture timeout')
+          throw new Error('Face capture timeout')
+        }
+      }, 30000) // Increased timeout to 30 seconds
 
-    if (faceDescriptors.length === 0) {
-      throw new Error('No face descriptors captured')
-    }
+      const maxCaptureRetries = 6
+      const retryInterval = 850
+      console.log('Starting face capture')
+      const faceDescriptors = await captureFace(maxCaptureRetries, retryInterval)
 
-    console.log('Computing average descriptor')
-    const avgDescriptor = faceDescriptors[0].map(
-      (_, i) => faceDescriptors.reduce((sum, desc) => sum + desc[i], 0) / faceDescriptors.length
-    )
+      clearTimeout(faceCaptureTimeout)
 
-    if (props.mode === 'signup') {
-      console.log('Signup mode: Emitting face descriptor')
-      faceCaptured.value = true
-      faceVerified.value = true
-      showCamera.state = false
-      stopVideo()
-      emit('faceDescriptor', avgDescriptor)
-      emit('verified')
-    } else if (props.mode === 'quiz') {
-      console.log('Quiz mode: Validating face')
-      const response = await authService.validateFace(avgDescriptor, user.value.email)
-      console.log(response)
-      if (response.status == 'success') {
-        console.log('Face verified successfully')
-        verified.value = true
+      if (faceDescriptors.length === 0) {
+        throw new Error('No face descriptors captured')
+      }
+
+      console.log('Computing average descriptor')
+      const avgDescriptor = faceDescriptors[0].map(
+        (_, i) => faceDescriptors.reduce((sum, desc) => sum + desc[i], 0) / faceDescriptors.length
+      )
+
+      if (props.mode === 'signup') {
+        console.log('Signup mode: Emitting face descriptor')
         faceCaptured.value = true
         faceVerified.value = true
-        showCamera.state = false
-        stopVideo()
+        emit('faceDescriptor', avgDescriptor)
         emit('verified')
-      } else {
-        console.log('Face verification failed')
-        errorMessage.value = 'Face verification failed'
+        break
+      } else if (props.mode === 'quiz') {
+        console.log('Quiz mode: Validating face')
+        const response = await authService.validateFace(avgDescriptor, user.value.email)
+        console.log(response)
+        if (response.status === 'success') {
+          console.log('Face verified successfully')
+          verified.value = true
+          faceCaptured.value = true
+          faceVerified.value = true
+          emit('verified')
+          break
+        } else if (response.status === 401) {
+          console.log('Authentication failed')
+          errorMessage.value = 'Authentication failed. Please try again or contact support.'
+        } else {
+          console.log('Face verification failed')
+          errorMessage.value = 'Face verification failed. Please try again.'
+        }
       }
+    } catch (error) {
+      console.error(`Attempt ${retryCount + 1} failed:`, error)
+      retryCount++
+      if (retryCount >= maxRetries) {
+        errorMessage.value =
+          'Face verification failed after multiple attempts. Please try again later.'
+      } else {
+        await new Promise((resolve) => setTimeout(resolve, 2000)) // Wait 2 seconds before retrying
+      }
+    } finally {
+      faceAuthLoading.value = false
     }
-  } catch (error) {
-    console.error('Error in captureAndVerifyFace:', error)
-    faceAuthLoading.value = false
-    errorMessage.value = error.message || 'An error occurred during face capture and verification'
-  } finally {
-    clearTimeout(faceCaptureTimeout)
-    showCamera.state = false
-    stopVideo()
   }
+
+  showCamera.state = false
+  stopVideo()
 }
 
 watch(showCamera, async (newShowCamera) => {
   if (newShowCamera.state) {
     faceAuthLoading.value = true
     isVideoLoading.value = true
-    await loadModels()
-    await startVideo()
-    if (!cancelLoading.value) {
-      captureAndVerifyFace()
+    errorMessage.value = null
+    try {
+      await loadModels()
+      await startVideo()
+      console.log('Video started, waiting before face capture')
+      await new Promise((resolve) => setTimeout(resolve, 2000)) // Wait 2 seconds before starting face capture
+      if (!cancelLoading.value) {
+        await captureAndVerifyFace()
+      }
+    } catch (error) {
+      console.error('Error in showCamera watch:', error)
+      errorMessage.value = 'An error occurred while setting up the camera. Please try again.'
+    } finally {
+      faceAuthLoading.value = false
+      isVideoLoading.value = false
     }
   } else {
-    clearInterval(faceCaptureInterval)
-    clearTimeout(faceCaptureTimeout)
     stopVideo()
-    faceAuthLoading.value = false
-    isVideoLoading.value = false
+  }
+})
+
+watch(cancelLoading, (newCancelLoading) => {
+  if (newCancelLoading) {
+    stopVideo()
   }
 })
 
