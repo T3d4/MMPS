@@ -1,3 +1,5 @@
+import mongoose from "mongoose";
+
 //Under development
 export interface IQuiz {
     id?: string;
@@ -5,6 +7,7 @@ export interface IQuiz {
     questions?: Question[];
     duration?: number;
     dateCreated?: Date;
+    taken?: mongoose.Types.ObjectId[];
 }
 
 interface Question {

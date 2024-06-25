@@ -1,6 +1,7 @@
 //Under development
 import { Request, Response, NextFunction } from "express";
 import { Quiz } from "../models";
+import { QuizResult } from "../models";
 
 export class QuizController {
 
@@ -22,6 +23,8 @@ export class QuizController {
     async getQuizById(req: Request, res: Response, next: NextFunction) {
         try {
             const quizId = req.params.id;
+            console.log(quizId)
+            const { userId } = req.query;
             const quiz = await Quiz.findById(quizId);
 
             if (!quiz) {
@@ -29,7 +32,12 @@ export class QuizController {
                 return;
             }
 
-            res.status(200).json(quiz);
+            const hasTaken = await QuizResult.exists({ quizId: quizId, userId });
+
+            return res.status(200).json({
+                quiz,
+                hasTaken,
+            });
         } catch (error) {
             next(error);
         }

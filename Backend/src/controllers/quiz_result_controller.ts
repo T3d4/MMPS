@@ -1,6 +1,7 @@
 // controllers/QuizResultController.ts
 import { Request, Response, NextFunction } from 'express';
-import QuizResult from '../models/quiz_result_model';
+import {QuizResult} from '../models';
+import { Quiz } from '../models';
 
 export class QuizResultController {
 
@@ -27,6 +28,16 @@ export class QuizResultController {
                 correctAnswers
             });
 
+            const quiz = await Quiz.findById(quizId);
+            if (!quiz) {
+                return res.status(404).json({ message: "Quiz not found" });
+            }
+
+            // Add the user's ID to the taken array if not already present
+            if (!quiz.taken.includes(userId)) {
+                quiz.taken.push(userId);
+                await quiz.save();
+            }
             const savedQuizResult = await newQuizResult.save();
 
             res.status(201).json({ message: 'Quiz result saved successfully', quizResult: savedQuizResult });
