@@ -22,19 +22,19 @@
         class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600 transition duration-200 mr-4"
         >Go Back</RouterLink
       >
-      <button
+      <!-- <button
         @click="$emit('retakeQuiz')"
         class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition duration-200"
       >
         Retake Quiz
-      </button>
+      </button> -->
     </div>
   </div>
 </template>
 
 <script setup>
 import { computed } from 'vue'
-import { timeLeft, timeTaken } from '@/global_state/state'
+import {  timeTaken } from '@/global_state/state'
 
 const props = defineProps({
   numberOfCorrectAnswers: Number,
@@ -43,11 +43,7 @@ const props = defineProps({
   yourAnswers: Array,
   duration: Number
 })
-// Function to format time taken (e.g., in minutes and seconds)
-function revertTimerState() {
-  timeLeft.time = props.duration
-  timeTaken.time = 0
-}
+
 // Function to format time taken
 function formatTimeTaken(seconds) {
   const minutes = Math.floor(seconds / 60)
