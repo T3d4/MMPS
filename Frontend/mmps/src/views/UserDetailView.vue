@@ -81,7 +81,7 @@
                     </th>
                   </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-800">
+                <tbody class="divide-y divide-x divide-gray-800">
                   <tr v-for="quiz in user.quizzes" :key="quiz.date" class="hover:bg-gray-400 bg-gray-300">
                     <td class="px-4 py-3 whitespace-nowrap text-gray-800">{{ quiz.quizName }}</td>
                     <td class="px-4 py-3 whitespace-nowrap text-gray-800">{{ quiz.correctAnswers }}</td>
