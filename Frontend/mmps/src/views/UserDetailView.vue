@@ -52,7 +52,7 @@
             <h3 class="text-xl mb-4 text-gray-600">Scores of Previous Quizzes</h3>
             <div class="overflow-x-auto">
               <table class="w-full mb-4 bg-gray-800 rounded-lg overflow-y-auto">
-                <thead class="bg-gray-200">
+                <thead class="bg-gray-300">
                   <tr>
                     <th
                       class="px-4 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider"
@@ -82,7 +82,7 @@
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-300">
-                  <tr v-for="quiz in user.quizzes" :key="quiz.date" class="hover:bg-gray-300">
+                  <tr v-for="quiz in user.quizzes" :key="quiz.date" class="hover:bg-gray-400 bg-gray-300">
                     <td class="px-4 py-3 whitespace-nowrap text-gray-800">{{ quiz.quizName }}</td>
                     <td class="px-4 py-3 whitespace-nowrap text-gray-800">{{ quiz.correctAnswers }}</td>
                     <td class="px-4 py-3 whitespace-nowrap text-gray-800">{{ quiz.totalQuestions }}</td>
