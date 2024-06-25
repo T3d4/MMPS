@@ -179,6 +179,7 @@ const submitQuiz = async () => {
 
   // Optionally, you can also store these results in a backend or Vuex store
   const quizResult = {
+    quizId: quiz.value._id,
     date: new Date().toISOString(),
     quizName: quiz.value.name,
     timeTaken: timeTaken.time / 60,
