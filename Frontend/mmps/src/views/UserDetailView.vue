@@ -142,7 +142,7 @@
 import { ref, onMounted } from 'vue'
 import AdminHeader from '@/components/AdminHeader.vue'
 import { useRoute } from 'vue-router'
-import { view } from '@/global_state/state'
+import { currentTabState, view } from '@/global_state/state'
 import { axiosInstance } from '@/axiosConfig' // Adjust the path as needed
 import router from '@/router'
 
@@ -159,6 +159,7 @@ const user = ref({
 
 const goBack = () => {
   router.go(-1)
+  currentTabState.value = "details"
 }
 
 // Fetch user data based on userId

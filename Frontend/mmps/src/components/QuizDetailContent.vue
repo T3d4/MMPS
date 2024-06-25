@@ -120,11 +120,16 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { formatDate } from '@/utils/date'
 import { currentTabState } from '@/global_state/state'
 import { axiosInstance } from '@/axiosConfig'
+import { useStore } from 'vuex'
+
+const store = useStore()
+const userId = computed(() => store.getters.user._id)
+const uid = userId.value
 
 const route = useRoute()
 const router = useRouter()
@@ -140,8 +145,8 @@ const quiz = ref({
 // Fetch quiz data based on quizId
 const fetchQuizData = async (id) => {
   try {
-    const response = await axiosInstance.get(`/quiz/${id}`)
-    const { _id, ...rest } = response.data
+    const response = await axiosInstance.get(`/quiz/${id}`, { params: { uid } })
+    const { _id, ...rest } = response.data.quiz
     quiz.value = { id: _id, ...rest }
   } catch (error) {
     console.error('Error fetching quiz data:', error)

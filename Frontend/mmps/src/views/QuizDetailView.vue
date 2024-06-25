@@ -26,7 +26,7 @@
 import AdminHeader from '@/components/AdminHeader.vue'
 import QuizDetailMenu from '@/components/QuizDetailMenu.vue'
 import QuizDetailContent from '@/components/QuizDetailContent.vue'
-import { view } from '@/global_state/state'
+import { currentTabState, view } from '@/global_state/state'
 import { onMounted } from 'vue'
 import router from '@/router'
 
@@ -34,5 +34,6 @@ onMounted(() => (view.value = 'admin'))
 
 const goBack = () => {
   router.go(-1)
+  currentTabState.value = "details"
 }
 </script>
