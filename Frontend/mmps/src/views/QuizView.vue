@@ -49,7 +49,7 @@ import Result from '@/components/ResultComponent.vue'
 import QuestionSidebar from '@/components/QuestionSidebar.vue'
 import ConfirmationModal from '@/components/ConfirmationModal.vue'
 import { useRoute } from 'vue-router'
-import { timeLeft, timeTaken, updateTimeLeft, updateTimeTaken } from '@/global_state/state'
+import { timeLeft, timeTaken } from '@/global_state/state'
 import { useStore } from 'vuex'
 import { axiosInstance } from '@/axiosConfig'
 
@@ -71,28 +71,12 @@ const selectedOptions = reactive([])
 
 const fetchQuizzes = async () => {
   try {
-    const response = await axiosInstance.get(`/quiz`)
+    const response = await axiosInstance.get('/quiz')
     quizes.value = response.data
     quiz.value = quizes.value.find((q) => q.id == quizId.value)
     if (quiz.value) {
       originalDuration.value = quiz.value.duration * 60
-
-      // Check if there's stored timeLeft in localStorage
-      const storedTimeLeft = localStorage.getItem('timeLeft')
-      if (storedTimeLeft) {
-        updateTimeLeft(parseInt(storedTimeLeft))
-      } else {
-        updateTimeLeft(quiz.value.duration * 60) // Set initial time
-      }
-
-      // Check if there's stored currentQuestionIndex in localStorage
-      const storedCurrentQuestionIndex = localStorage.getItem('currentQuestionIndex')
-      if (storedCurrentQuestionIndex) {
-        currentQuestionIndex.value = parseInt(storedCurrentQuestionIndex)
-      } else {
-        currentQuestionIndex.value = 0 // Default to the first question
-      }
-
+      timeLeft.time = quiz.value.duration * 60 // Set initial time
       selectedOptions.splice(
         0,
         selectedOptions.length,
@@ -106,37 +90,11 @@ const fetchQuizzes = async () => {
   }
 }
 
-// Watch for changes in timeLeft and currentQuestionIndex
-watchEffect(() => {
-  localStorage.setItem('timeLeft', timeLeft.time.toString())
-  localStorage.setItem('currentQuestionIndex', currentQuestionIndex.value.toString())
-})
-
-onMounted(() => {
-  fetchQuizzes()
-
-  // Restore timer state from localStorage
-  const storedTimeLeft = localStorage.getItem('timeLeft')
-  if (storedTimeLeft) {
-    updateTimeLeft(parseInt(storedTimeLeft))
-  }
-
-  // Restore currentQuestionIndex from localStorage
-  const storedCurrentQuestionIndex = localStorage.getItem('currentQuestionIndex')
-  if (storedCurrentQuestionIndex) {
-    currentQuestionIndex.value = parseInt(storedCurrentQuestionIndex)
-  }
-
-  // Start the timer
-  if (!showResults.value) {
-    startTimer()
-  }
-})
+onMounted(() => fetchQuizzes())
 
 const questionStatus = computed(
   () => `${currentQuestionIndex.value + 1}/${quiz.value.questions.length}`
 )
-
 const barPercentage = computed(
   () => `${(answeredQuestions.length / quiz.value.questions.length) * 100}%`
 )
@@ -221,7 +179,6 @@ const submitQuiz = async () => {
 
   // Optionally, you can also store these results in a backend or Vuex store
   const quizResult = {
-    quizId: quiz.value._id,
     date: new Date().toISOString(),
     quizName: quiz.value.name,
     timeTaken: timeTaken.time / 60,
@@ -243,18 +200,39 @@ const navigateToQuestion = (index) => {
   currentQuestionIndex.value = index
 }
 
-const startTimer = () => {
-  console.log('started')
-  timerInterval = setInterval(() => {
-    if (timeLeft.time > 0) {
-      updateTimeLeft(timeLeft.time - 1)
-      updateTimeTaken(timeTaken.time + 1)
-    } else {
-      clearInterval(timerInterval)
-      showResults.value = true
-    }
-  }, 1000) // Update every second
+const restartQuiz = () => {
+  currentQuestionIndex.value = 0
+  Object.keys(userAnswers).forEach((key) => delete userAnswers[key])
+  numberOfCorrectAnswers.value = 0
+  answeredQuestions.length = 0
+  showResults.value = false
+  timeLeft.time = originalDuration.value // Reset to original duration
+  timeTaken.time = 0
+  selectedOptions.splice(
+    0,
+    selectedOptions.length,
+    ...Array(quiz.value.questions.length).fill(null)
+  )
 }
+
+watchEffect(() => {
+  if (quiz.value && !showResults.value) {
+    // Start the timer
+    timerInterval = setInterval(() => {
+      if (timeLeft.time > 0) {
+        timeLeft.time-- // Decrement seconds
+        timeTaken.time++ // Increment time taken
+      } else {
+        clearInterval(timerInterval)
+        showResults.value = true
+        submitQuiz()
+      }
+    }, 1000) // Update every second
+  } else {
+    // Stop the timer
+    clearInterval(timerInterval)
+  }
+})
 
 onBeforeUnmount(() => {
   clearInterval(timerInterval)
