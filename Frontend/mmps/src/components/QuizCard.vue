@@ -2,14 +2,14 @@
 <template>
   <div
     @click="selectQuiz"
-    :class="{ 'card-taken': quiz.taken, 'card-available': !quiz.taken }"
+    :class="{ 'card-taken': quiz.taken && !store.getters.isAdmin, 'card-available': !quiz.taken || store.getters.isAdmin }"
     class="bg-gray-700 text-gray-300 p-4 rounded-lg hover:bg-gray-600 cursor-pointer transition-all duration-200"
   >
     <h3 class="text-lg font-bold mb-2">{{ quiz.name }}</h3>
     <p class="text-sm">Questions: {{ quiz.questions.length }}</p>
     <p class="text-sm">Time: {{ quiz.duration }} Minutes</p>
     <p v-if="isAdmin" class="text-sm">Created at: {{ formatDate(quiz.dateCreated) }}</p>
-    <div v-if="quiz.taken" class="text-red-400 text-sm">Already taken</div>
+    <div v-if="quiz.taken && !store.getters.isAdmin" class="text-red-400 text-sm">Already taken</div>
   </div>
 </template>
 
@@ -32,7 +32,7 @@ const selectQuiz = () => {
   console.log(props.quiz.taken)
   if (!props.quiz.taken || store.getters.isAdmin) {
     emit('quizSelected', quizId, props.quiz.duration)
-  }
+  } 
 }
 
 const formatDate = (dateString) => {
