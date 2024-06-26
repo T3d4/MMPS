@@ -51,43 +51,69 @@
             <h2 class="text-2xl text-gray-800 font-bold mb-3">{{ user.name }}</h2>
             <h3 class="text-xl mb-4 text-gray-600">Scores of Previous Quizzes</h3>
             <div class="overflow-x-auto">
-              <table class="w-full mb-4 bg-gray-800 rounded-lg overflow-y-auto">
-                <thead class="bg-gray-300">
+              <table
+                class="w-full mb-4 bg-gray-800 rounded-lg overflow-y-auto table-auto border-2 border-gray-500"
+              >
+                <thead class="bg-gray-300 border-b-2 border-gray-500">
                   <tr>
                     <th
-                      class="px-4 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider"
+                      class="px-4 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider border-2 border-gray-500"
                     >
                       Quiz Name
                     </th>
                     <th
-                      class="px-4 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider"
+                      class="px-4 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider border-2 border-gray-500"
                     >
                       Score
                     </th>
                     <th
-                      class="px-4 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider"
+                      class="px-4 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider border-2 border-gray-500"
                     >
                       Obtainable Score
                     </th>
                     <th
-                      class="px-4 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider"
+                      class="px-4 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider border-2 border-gray-500"
                     >
                       Date
                     </th>
                     <th
-                      class="px-4 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider"
+                      class="px-4 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider border-2 border-gray-500"
                     >
                       Time
                     </th>
                   </tr>
                 </thead>
-                <tbody class="divide-y divide-x divide-gray-800">
-                  <tr v-for="quiz in user.quizzes" :key="quiz.date" class="hover:bg-gray-400 bg-gray-300">
-                    <td class="px-4 py-3 whitespace-nowrap text-gray-800">{{ quiz.quizName }}</td>
-                    <td class="px-4 py-3 whitespace-nowrap text-gray-800">{{ quiz.correctAnswers }}</td>
-                    <td class="px-4 py-3 whitespace-nowrap text-gray-800">{{ quiz.totalQuestions }}</td>
-                    <td class="px-4 py-3 whitespace-nowrap text-gray-800">{{ formatDate(quiz.date) }}</td>
-                    <td class="px-4 py-3 whitespace-nowrap text-gray-800">{{ formatTime(quiz.date) }}</td>
+                <tbody class="divide-y-2 divide-gray-800">
+                  <tr
+                    v-for="quiz in user.quizzes"
+                    :key="quiz.date"
+                    class="hover:bg-gray-400 bg-gray-300 border-2 border-gray-500"
+                  >
+                    <td
+                      class="px-4 py-3 whitespace-nowrap text-gray-800 border-2 border-gray-500"
+                    >
+                      {{ quiz.quizName }}
+                    </td>
+                    <td
+                      class="px-4 py-3 whitespace-nowrap text-gray-800 border-2 border-gray-500"
+                    >
+                      {{ quiz.correctAnswers }}
+                    </td>
+                    <td
+                      class="px-4 py-3 whitespace-nowrap text-gray-800 border-2 border-gray-500"
+                    >
+                      {{ quiz.totalQuestions }}
+                    </td>
+                    <td
+                      class="px-4 py-3 whitespace-nowrap text-gray-800 border-2 border-gray-500"
+                    >
+                      {{ formatDate(quiz.date) }}
+                    </td>
+                    <td
+                      class="px-4 py-3 whitespace-nowrap text-gray-800 border-2 border-gray-500"
+                    >
+                      {{ formatTime(quiz.date) }}
+                    </td>
                   </tr>
                 </tbody>
               </table>
@@ -159,7 +185,7 @@ const user = ref({
 
 const goBack = () => {
   router.go(-1)
-  currentTabState.value = "details"
+  currentTabState.value = 'details'
 }
 
 // Fetch user data based on userId
