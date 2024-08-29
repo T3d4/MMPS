@@ -1,42 +1,87 @@
+---
+
 # MMPS (Multi-Modal Proctoring System)
 
-MMPS is an innovative educational platform designed to enhance online assessment experiences through secure authentication methods and intuitive quiz management.
+MMPS is an innovative educational platform designed to enhance online assessment experiences through secure authentication methods and intuitive quiz management. The system combines biometric verification with a user-friendly interface to ensure a seamless and secure assessment process.
 
 ## Features
 
-- **Biometric Authentication:** MMPS utilizes advanced biometric authentication methods to ensure secure user verification.
-- **Intuitive Quiz Management:** The platform offers easy-to-use quiz creation, management, and scoring functionalities for educators.
-- **User-Friendly Interface:** MMPS boasts a simple and intuitive interface, making it accessible for both educators and learners.
-- **Enhanced Security:** With robust security measures in place, MMPS prioritizes the protection of user data and assessment integrity.
+- **Biometric Authentication:** Implement biometric methods to ensure secure and reliable user verification.
+- **Intuitive Quiz Management:** Easily create, manage, and score quizzes with MMPS’s comprehensive toolset designed for educators.
+- **User-Friendly Interface:** The platform features an accessible and straightforward interface, making it easy for both educators and learners to navigate.
+- **Enhanced Security:** MMPS prioritizes the protection of user data and the integrity of assessments with robust security measures.
 
 ## Getting Started
 
-To get started with MMPS, follow these steps:
+Follow these steps to set up and start using MMPS on your local machine.
 
-1. **Clone the Repository:** Clone the MMPS repository to your local machine. (Note: As this is a private repository, ensure you have access permissions.)
-   ```
+### Prerequisites
+
+Ensure you have the following installed on your machine:
+
+- Node.js
+- npm (Node Package Manager)
+- Git
+
+### Installation
+
+1. **Clone the Repository:** Begin by cloning the MMPS repository to your local machine. Ensure you have the necessary access permissions.
+   ```bash
    git clone https://github.com/T3d4/mmps.git
    ```
 
-2. **Install Dependencies:** Navigate to the project directory and install the necessary dependencies.
-   ```
+2. **Install Dependencies:** Navigate to the project directory and install all necessary dependencies.
+   ```bash
    cd mmps
    npm install
    ```
 
-3. **Start the Application:** Once dependencies are installed, start the MMPS application.
-   ```
+3. **Start the Application:** After installing dependencies, start the MMPS application.
+   ```bash
    npm start
    ```
 
-4. **Access MMPS:** Open your web browser and navigate to [http://localhost:3000](http://localhost:3000) to access MMPS.
+4. **Access MMPS:** Once the application is running, open your web browser and go to [http://localhost:3000](http://localhost:3000) to access MMPS.
+
+## Usage
+
+### For Educators
+
+- **Create Quizzes:** Use the intuitive interface to create and customize quizzes.
+- **Manage Assessments:** Monitor and manage ongoing assessments with ease.
+- **Analyze Results:** Review quiz results and analyze student performance directly from the platform.
+
+### For Learners
+
+- **Secure Login:** Authenticate using biometric methods to access your assessments.
+- **Take Quizzes:** Complete your assessments within the secure environment of MMPS.
+- **View Results:** Review your scores and feedback after the quiz is graded.
 
 ## Contributing
 
-Contributions to MMPS are not open to the public as it is a private project. However, team members with access permissions can contribute as needed.
+MMPS is an open-source project, and contributions are welcomed from the community. If you would like to contribute, please follow these guidelines:
+
+1. **Fork the Repository:** Start by forking the repository to your GitHub account.
+2. **Create a Feature Branch:** Create a branch for your feature or bug fix.
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
+3. **Commit Your Changes:** Make your changes and commit them with a clear and concise message.
+   ```bash
+   git commit -m "Add your message here"
+   ```
+4. **Push to Your Branch:** Push your changes to your forked repository.
+   ```bash
+   git push origin feature/your-feature-name
+   ```
+5. **Submit a Pull Request:** Open a pull request against the main branch of the original repository. Describe your changes and why they should be merged.
 
 ## License
 
-This project is proprietary and is not open source. All rights reserved by the owner. No part of this project may be reproduced, distributed, or transmitted in any form or by any means without the prior written permission of the owner.
+MMPS is licensed under the MIT License. This project is maintained by [Teda](https://github.com/T3d4), who retains full ownership and rights. If you use this project in your work, please provide appropriate credit by linking back to the original repository.
+
+## Disclaimer
+
+MMPS is provided "as-is" without any warranty of any kind, express or implied. Use at your own risk.
 
 ---
