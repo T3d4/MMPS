@@ -6,7 +6,7 @@ MMPS is an innovative educational platform designed to enhance online assessment
 
 ## Features
 
-- **Biometric Authentication:** Implement advanced biometric methods to ensure secure and reliable user verification.
+- **Biometric Authentication:** Implement biometric methods to ensure secure and reliable user verification.
 - **Intuitive Quiz Management:** Easily create, manage, and score quizzes with MMPS’s comprehensive toolset designed for educators.
 - **User-Friendly Interface:** The platform features an accessible and straightforward interface, making it easy for both educators and learners to navigate.
 - **Enhanced Security:** MMPS prioritizes the protection of user data and the integrity of assessments with robust security measures.
