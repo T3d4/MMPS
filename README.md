@@ -6,7 +6,7 @@ MMPS is an innovative educational platform designed to enhance online assessment
 
 ## Features
 
-- **Biometric Authentication:** Implement biometric methods to ensure secure and reliable user verification.
+- **Biometric Authentication:** Implement advanced biometric methods to ensure secure and reliable user verification.
 - **Intuitive Quiz Management:** Easily create, manage, and score quizzes with MMPS’s comprehensive toolset designed for educators.
 - **User-Friendly Interface:** The platform features an accessible and straightforward interface, making it easy for both educators and learners to navigate.
 - **Enhanced Security:** MMPS prioritizes the protection of user data and the integrity of assessments with robust security measures.
@@ -41,7 +41,7 @@ Ensure you have the following installed on your machine:
    npm start
    ```
 
-4. **Access MMPS:** Once the application is running, open your web browser and go to [http://localhost:3000](http://localhost:3000) to access MMPS.
+4. **Access MMPS:** Once the application is running, open your web browser and go to [http://localhost:5173](http://localhost:5173) to access MMPS.
 
 ## Usage
 
@@ -61,20 +61,37 @@ Ensure you have the following installed on your machine:
 
 MMPS is an open-source project, and contributions are welcomed from the community. If you would like to contribute, please follow these guidelines:
 
+### Branch Policy for Features and Bug Fixes
+
 1. **Fork the Repository:** Start by forking the repository to your GitHub account.
-2. **Create a Feature Branch:** Create a branch for your feature or bug fix.
+
+2. **Create a Feature Branch:** For new features or significant changes, create a branch with the prefix `feature/`.  
+   Example:
    ```bash
    git checkout -b feature/your-feature-name
    ```
-3. **Commit Your Changes:** Make your changes and commit them with a clear and concise message.
+
+3. **Create a Bug Fix Branch:** For bug fixes, create a branch with the prefix `bugfix/`.  
+   Example:
+   ```bash
+   git checkout -b bugfix/your-bugfix-name
+   ```
+
+4. **Commit Your Changes:** Make your changes and commit them with a clear and concise message.
    ```bash
    git commit -m "Add your message here"
    ```
-4. **Push to Your Branch:** Push your changes to your forked repository.
+
+5. **Push to Your Branch:** Push your changes to your forked repository.
    ```bash
    git push origin feature/your-feature-name
    ```
-5. **Submit a Pull Request:** Open a pull request against the main branch of the original repository. Describe your changes and why they should be merged.
+   or
+   ```bash
+   git push origin bugfix/your-bugfix-name
+   ```
+
+6. **Submit a Pull Request:** Open a pull request against the main branch of the original repository. Describe your changes and why they should be merged.
 
 ## License
 
